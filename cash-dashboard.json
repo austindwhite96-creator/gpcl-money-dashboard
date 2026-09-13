@@ -1,0 +1,33 @@
+{
+  "syncedFrom": "GPCL 2026 Cash Tracker",
+  "sheetId": "1m5aqey3gauuEWcAt4u3fRYBJ5wLYaelBCz43_wds4GE",
+  "syncedAt": "2026-09-13T00:56:00Z",
+  "hardRevenue": 0,
+  "hardExpenses": 386.97,
+  "netCashProfit": -386.97,
+  "cashMargin": null,
+  "receiptsNeeded": 0,
+  "categories": [
+    {"name": "Materials", "total": 0},
+    {"name": "Advertising", "total": 202.36},
+    {"name": "Website / Software", "total": 0},
+    {"name": "Equipment / Tools", "total": 184.61},
+    {"name": "Vehicle / Fuel", "total": 0},
+    {"name": "Subcontract Labor", "total": 0},
+    {"name": "Permits / Fees", "total": 0},
+    {"name": "Other", "total": 0}
+  ],
+  "jobs": [{
+    "address": "8304 Shasta Dr, McKinney, TX 75071",
+    "customer": "Nathan Amos",
+    "quoteId": "GPCL-260911-NATH-B0629BE1",
+    "quotedRevenue": 225,
+    "revenueCollected": 0,
+    "hardProfit": 0,
+    "notes": "Deposit waived (neighbor). Expect payment at/after install 2026-11-05."
+  }],
+  "recentTransactions": [
+    {"date": "2026-09-06", "type": "Expense", "vendor": "UPrinting", "category": "Advertising", "description": "1,000 GPCL postcards", "moneyIn": 0, "moneyOut": 202.36},
+    {"date": "2026-09-11", "type": "Expense", "vendor": "TXF Light Source", "category": "Equipment / Tools", "description": "Pitch Hopper + Socket Wrench w/ Clippers", "moneyIn": 0, "moneyOut": 184.61}
+  ]
+}
