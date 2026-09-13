@@ -1,7 +1,8 @@
 import type { CashDashboard } from '../types'
 
 export async function loadCashDashboard(): Promise<CashDashboard> {
-  const res = await fetch('/cash-dashboard.json')
+  const url = `${import.meta.env.BASE_URL}cash-dashboard.json`
+  const res = await fetch(url)
   if (!res.ok) {
     throw new Error(`Failed to load cash dashboard (${res.status})`)
   }

@@ -56,7 +56,7 @@ export default function App() {
           {loadError ?? 'Cash dashboard file is missing or invalid.'}
         </p>
         <p className="mt-4 max-w-sm text-xs text-gpcl-800/60">
-          Expected <code className="rounded bg-gpcl-100 px-1">/cash-dashboard.json</code>. Tell App
+          Expected <code className="rounded bg-gpcl-100 px-1">cash-dashboard.json</code>. Tell App
           Developer “refresh the dashboard”.
         </p>
         <button
