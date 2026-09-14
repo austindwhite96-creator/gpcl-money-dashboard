@@ -1,6 +1,6 @@
 # Cash Tracker sync (one step)
 
-**Source of truth:** Google Sheet [GPCL 2026 Cash Tracker](https://docs.google.com/spreadsheets/d/10ABg0WGlqV9uIukJh8hZz9i-bCQYxjBmfSxKMG0R3Hs)
+**Source of truth:** Google Sheet [GPCL 2026 Cash Tracker](https://docs.google.com/spreadsheets/d/1afAhRDk4iF0PIv9JL3Se7YBgjvITj4U0wSogT73e-xA)
 
 **What the app reads:** `public/cash-dashboard.json` (snapshot — not a live Sheet API)
 
@@ -21,7 +21,7 @@ That’s it. The assistant will:
 ```json
 {
   "syncedFrom": "GPCL 2026 Cash Tracker",
-  "sheetId": "10ABg0WGlqV9uIukJh8hZz9i-bCQYxjBmfSxKMG0R3Hs",
+  "sheetId": "1afAhRDk4iF0PIv9JL3Se7YBgjvITj4U0wSogT73e-xA",
   "syncedAt": "ISO-8601",
   "hardRevenue": 0,
   "hardExpenses": 0,
