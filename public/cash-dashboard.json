@@ -1,33 +1,84 @@
 {
   "syncedFrom": "GPCL 2026 Cash Tracker",
-  "sheetId": "1m5aqey3gauuEWcAt4u3fRYBJ5wLYaelBCz43_wds4GE",
-  "syncedAt": "2026-09-13T00:56:00Z",
+  "sheetId": "1gE7i8TOD_SkMt2XOlOQkdWg_v3PwvIrDw8YNH8BTzIw",
+  "syncedAt": "2026-09-14T20:31:48Z",
   "hardRevenue": 0,
   "hardExpenses": 386.97,
   "netCashProfit": -386.97,
   "cashMargin": null,
   "receiptsNeeded": 0,
   "categories": [
-    {"name": "Materials", "total": 0},
-    {"name": "Advertising", "total": 202.36},
-    {"name": "Website / Software", "total": 0},
-    {"name": "Equipment / Tools", "total": 184.61},
-    {"name": "Vehicle / Fuel", "total": 0},
-    {"name": "Subcontract Labor", "total": 0},
-    {"name": "Permits / Fees", "total": 0},
-    {"name": "Other", "total": 0}
+    {
+      "name": "Materials",
+      "total": 0
+    },
+    {
+      "name": "Advertising",
+      "total": 202.36
+    },
+    {
+      "name": "Website / Software",
+      "total": 0
+    },
+    {
+      "name": "Equipment / Tools",
+      "total": 184.61
+    },
+    {
+      "name": "Vehicle / Fuel",
+      "total": 0
+    },
+    {
+      "name": "Subcontract Labor",
+      "total": 0
+    },
+    {
+      "name": "Permits / Fees",
+      "total": 0
+    },
+    {
+      "name": "Other",
+      "total": 0
+    }
   ],
-  "jobs": [{
-    "address": "8304 Shasta Dr, McKinney, TX 75071",
-    "customer": "Nathan Amos",
-    "quoteId": "GPCL-260911-NATH-B0629BE1",
-    "quotedRevenue": 225,
-    "revenueCollected": 0,
-    "hardProfit": 0,
-    "notes": "Deposit waived (neighbor). Expect payment at/after install 2026-11-05."
-  }],
+  "jobs": [
+    {
+      "address": "8304 Shasta Dr, McKinney, TX 75071",
+      "customer": "Nathan Amos",
+      "quoteId": "GPCL-260911-NATH-B0629BE1",
+      "quotedRevenue": 225,
+      "revenueCollected": 0,
+      "hardProfit": 0,
+      "notes": "Deposit Waived (neighbor) \u2014 expect payment at/after install 2026-11-05, not a deposit line. Accepted | Quote GPCL-260911-NATH-B0629BE1. Overhead booked to General / \u2026 addresses does NOT hit job Hard Profit. Status: Accepted | Install 2026-11-05 (Nathan Amos)."
+    },
+    {
+      "address": "house next to Sheryl's (street TBD)",
+      "customer": "Jennifer Williams",
+      "quoteId": "",
+      "quotedRevenue": 100,
+      "revenueCollected": 0,
+      "hardProfit": 0,
+      "notes": "Deposit Waived (friend) \u2014 expect payment at/after install 2026-11-06, not a deposit line. Austin installs. Jace on schedule for TRAINING ONLY \u2014 $0 pay / no labor split to Jace. Phone 469-387-4156. Email jennifer@renebates.com (invoice only when Austin OK). Landmark house next to Sheryl's. Photo: GPCL Job Photos."
+    }
+  ],
   "recentTransactions": [
-    {"date": "2026-09-06", "type": "Expense", "vendor": "UPrinting", "category": "Advertising", "description": "1,000 GPCL postcards", "moneyIn": 0, "moneyOut": 202.36},
-    {"date": "2026-09-11", "type": "Expense", "vendor": "TXF Light Source", "category": "Equipment / Tools", "description": "Pitch Hopper + Socket Wrench w/ Clippers", "moneyIn": 0, "moneyOut": 184.61}
+    {
+      "date": "2026-09-06",
+      "type": "Expense",
+      "vendor": "UPrinting",
+      "category": "Advertising",
+      "description": "1,000 GPCL postcards (5x7 Front and Back)",
+      "moneyIn": 0,
+      "moneyOut": 202.36
+    },
+    {
+      "date": "2026-09-11",
+      "type": "Expense",
+      "vendor": "TXF Light Source",
+      "category": "Equipment / Tools",
+      "description": "Pitch Hopper 32\" Black (1) + Socket Wrench w/ Clippers (3)",
+      "moneyIn": 0,
+      "moneyOut": 184.61
+    }
   ]
 }
