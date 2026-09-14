@@ -1,12 +1,12 @@
 {
   "syncedFrom": "GPCL 2026 Cash Tracker",
-  "sheetId": "1gE7i8TOD_SkMt2XOlOQkdWg_v3PwvIrDw8YNH8BTzIw",
-  "syncedAt": "2026-09-14T20:31:48Z",
+  "sheetId": "10ABg0WGlqV9uIukJh8hZz9i-bCQYxjBmfSxKMG0R3Hs",
+  "syncedAt": "2026-09-14T21:25:17Z",
   "hardRevenue": 0,
-  "hardExpenses": 386.97,
-  "netCashProfit": -386.97,
+  "hardExpenses": 395.97,
+  "netCashProfit": -395.97,
   "cashMargin": null,
-  "receiptsNeeded": 0,
+  "receiptsNeeded": 1,
   "categories": [
     {
       "name": "Materials",
@@ -18,7 +18,7 @@
     },
     {
       "name": "Website / Software",
-      "total": 0
+      "total": 9.0
     },
     {
       "name": "Equipment / Tools",
@@ -62,6 +62,15 @@
     }
   ],
   "recentTransactions": [
+    {
+      "date": "2026-09-01",
+      "type": "Expense",
+      "vendor": "Netlify",
+      "category": "Website / Software",
+      "description": "Netlify Personal plan \u2014 gpcl-employee-ops hosting (recurring $9/mo)",
+      "moneyIn": 0,
+      "moneyOut": 9.0
+    },
     {
       "date": "2026-09-06",
       "type": "Expense",
