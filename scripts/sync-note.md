@@ -1,20 +1,30 @@
-# Cash Tracker sync (one step)
+# Cash Tracker sync
 
 **Source of truth:** Google Sheet [GPCL 2026 Cash Tracker](https://docs.google.com/spreadsheets/d/1afAhRDk4iF0PIv9JL3Se7YBgjvITj4U0wSogT73e-xA)
 
-**What the app reads:** `public/cash-dashboard.json` (snapshot — not a live Sheet API)
+## Live feed (preferred)
 
-## One-step refresh (for Austin)
+Apps Script Web App reads Dashboard / Transactions / Jobs and returns JSON (same shape as below).  
+Money Dashboard loads `public/config.json` → `dashboardUrl` first, then falls back to the bundled snapshot `public/cash-dashboard.json`.
 
-When you change the Cash Tracker sheet (new deposit, expense, job payment, etc.):
+**Austin going forward**
 
-> **Tell App Developer: `refresh the dashboard`**
+1. Edit the Cash Tracker sheet (deposits, expenses, job payments).
+2. Wait about **1 minute**.
+3. Refresh Money Dashboard in the browser.
 
-That’s it. The assistant will:
+**No redeploy for data.** Redeploy only when the UI/code changes.
 
-1. Pull the latest Sheet
-2. Rewrite `public/cash-dashboard.json`
-3. Redeploy the static host (Cloudflare Pages / Surge / GH Pages — **not Netlify**)
+One-time: paste the Web App `/exec` URL into `public/config.json` as `dashboardUrl`, then redeploy once.  
+Script source + deploy steps: `/workspace/gpcl-live-feeds/README.md`.
+
+Until `dashboardUrl` is set, the app uses the snapshot — nothing breaks.
+
+## Snapshot fallback
+
+`public/cash-dashboard.json` is a backup copy. Keep it roughly in sync when you can, but it is **not** required for day-to-day sheet edits once the live URL is set.
+
+~~Tell App Developer “refresh the dashboard”~~ — **not needed for data anymore.**
 
 ## Shape of the JSON
 

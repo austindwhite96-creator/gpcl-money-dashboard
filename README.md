@@ -3,7 +3,7 @@
 Green Pastures Christmas Lights — owner cash view for the 2026 season.
 
 Read-only phone-first page that answers **Where are we financially?**  
-Data is a snapshot of the Bookkeeper **Cash Tracker** (`public/cash-dashboard.json`), not a live Sheet API.
+Data comes from the Bookkeeper **Cash Tracker** via a live JSON feed when configured (`public/config.json` → `dashboardUrl`), with fallback to the bundled snapshot `public/cash-dashboard.json`.
 
 ## Run
 
@@ -27,17 +27,15 @@ Typical Cloudflare Pages settings: framework Vite, build command `npm run build`
 
 ## Refresh the dashboard
 
-When the Cash Tracker sheet changes, tell App Developer:
+Edit the Cash Tracker sheet → wait ~1 minute → refresh this site. **No redeploy for data.**
 
-> **refresh the dashboard**
-
-That rewrites `public/cash-dashboard.json` from the sheet. Details: `scripts/sync-note.md`.
+One-time: paste the Apps Script Web App URL into `public/config.json` as `dashboardUrl`, then redeploy once. Details: `scripts/sync-note.md` and `/workspace/gpcl-live-feeds/README.md`.
 
 ## Stack
 
 - Vite + React + TypeScript
 - Tailwind CSS v4 (`@tailwindcss/vite`) — same GPCL palette as employee ops (`gpcl-700` `#1b5e3b`, cream `#faf8f4`)
-- Loads `/cash-dashboard.json` via `fetch`
+- Loads live feed URL (if set) or `/cash-dashboard.json` via `fetch`
 
 ## What “Hard” means
 
