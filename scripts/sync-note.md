@@ -1,6 +1,6 @@
 # Cash Tracker sync
 
-**Source of truth:** Google Sheet [GPCL 2026 Cash Tracker](https://docs.google.com/spreadsheets/d/1afAhRDk4iF0PIv9JL3Se7YBgjvITj4U0wSogT73e-xA)
+**Source of truth:** Google Sheet [GPCL 2026 Cash Tracker](https://docs.google.com/spreadsheets/d/1psIydzf3x-kdWXGmljrcbQlpOZ9wA_WMwrKcakecN0Q)
 
 ## Live feed (preferred)
 
@@ -31,7 +31,7 @@ Until `dashboardUrl` is set, the app uses the snapshot — nothing breaks.
 ```json
 {
   "syncedFrom": "GPCL 2026 Cash Tracker",
-  "sheetId": "1afAhRDk4iF0PIv9JL3Se7YBgjvITj4U0wSogT73e-xA",
+  "sheetId": "1psIydzf3x-kdWXGmljrcbQlpOZ9wA_WMwrKcakecN0Q",
   "syncedAt": "ISO-8601",
   "hardRevenue": 0,
   "hardExpenses": 0,
