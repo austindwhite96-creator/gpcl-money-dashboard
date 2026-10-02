@@ -1,7 +1,7 @@
 {
   "syncedFrom": "GPCL 2026 Cash Tracker",
   "sheetId": "1psIydzf3x-kdWXGmljrcbQlpOZ9wA_WMwrKcakecN0Q",
-  "syncedAt": "2026-10-01T12:50:33.455Z",
+  "syncedAt": "2026-10-02T16:15:12.540Z",
   "hardRevenue": 0,
   "hardExpenses": 773.97,
   "netCashProfit": -773.97,
@@ -49,7 +49,7 @@
       "quotedRevenue": 225,
       "revenueCollected": 0,
       "hardProfit": 0,
-      "notes": "Accepted | Quote GPCL-260911-NATH-B0629BE1 | Install 2026-11-05. Deposit waived (neighbor) \u2014 pay at/after install, not a deposit line. Planned crew pay (policy only, not paid yet): Doug $125 at install (40% install + 10% takedown, all paid at install), $0 at takedown. Phone 214-733-7685. Overhead booked to General / \u2026 addresses does NOT hit job Hard Profit."
+      "notes": "Accepted | Quote GPCL-260911-NATH-B0629BE1 | Install 2026-11-05. Deposit waived (neighbor) — pay at/after install, not a deposit line. Planned crew pay (policy only, not paid yet): Doug $125 at install (40% install + 10% takedown, all paid at install), $0 at takedown. Phone 214-733-7685. Overhead booked to General / … addresses does NOT hit job Hard Profit."
     },
     {
       "address": "4808 CR 1006, McKinney, TX 75071",
@@ -58,7 +58,7 @@
       "quotedRevenue": 100,
       "revenueCollected": 0,
       "hardProfit": 0,
-      "notes": "Install 2026-11-02 (moved from Nov 6), 5-7 PM. Rehang of customer-owned lights \u2014 nontaxable, $0 tax (Austin confirmed 7:29 PM CT). Deposit waived (friend) \u2014 pay at/after install, not a deposit line. Planned crew pay (policy only, not paid yet): Austin $100, Jace $0 (Austin-assigned job rule: Austin $100, every other crew member $0). Phone 469-387-4156. Email jennifer@renebates.com (invoice only when Austin OK). Address 4808 CR 1006, McKinney, TX 75071. Photo in GPCL Job Photos."
+      "notes": "Install 2026-11-02 (moved from Nov 6), 5-7 PM. Rehang of customer-owned lights — nontaxable, $0 tax (Austin confirmed 7:29 PM CT). Deposit waived (friend) — pay at/after install, not a deposit line. Planned crew pay (policy only, not paid yet): Austin $100, Jace $0 (Austin-assigned job rule: Austin $100, every other crew member $0). Phone 469-387-4156. Email jennifer@renebates.com (invoice only when Austin OK). Address 4808 CR 1006, McKinney, TX 75071. Photo in GPCL Job Photos."
     },
     {
       "address": "8004 Juliette Dr, McKinney, TX 75071",
@@ -67,7 +67,7 @@
       "quotedRevenue": 100,
       "revenueCollected": 0,
       "hardProfit": 0,
-      "notes": "Quoted Revenue $100 is an ESTIMATE. Family, pay-what-you-want (~$100 expected). She buys her own materials \u2014 nontaxable rehang of customer-owned lights, $0 tax (Austin confirmed 7:29 PM CT). If she later pays GPCL for any items, that portion becomes taxable at 8.25%. Phone 972-775-0892. Austin's sister. Deposit waived \u2014 $0 deposit, full balance due at/after install. Install 2026-11-01. Planned crew pay (policy only, not paid yet): Austin $100, Doug $0 (Austin-assigned job rule)."
+      "notes": "Quoted Revenue $100 is an ESTIMATE. Family, pay-what-you-want (~$100 expected). She buys her own materials — nontaxable rehang of customer-owned lights, $0 tax (Austin confirmed 7:29 PM CT). If she later pays GPCL for any items, that portion becomes taxable at 8.25%. Phone 972-775-0892. Austin's sister. Deposit waived — $0 deposit, full balance due at/after install. Install 2026-11-01. Planned crew pay (policy only, not paid yet): Austin $100, Doug $0 (Doug is on the job as a training session, per Austin 2026-10-01; Austin-assigned job rule)."
     },
     {
       "address": "3907 Colton Dr, McKinney, TX 75071",
@@ -103,7 +103,7 @@
       "type": "Expense",
       "vendor": "Texas Secretary of State (SOSDirect)",
       "category": "Permits / Fees",
-      "description": "Certificate of Amendment \u2014 name change Alpha Omega Auctions LLC to Green Pastures Christmas Lights LLC",
+      "description": "Certificate of Amendment — name change Alpha Omega Auctions LLC to Green Pastures Christmas Lights LLC",
       "moneyIn": 0,
       "moneyOut": 150
     },
@@ -130,7 +130,7 @@
       "type": "Expense",
       "vendor": "UPrinting",
       "category": "Advertising",
-      "description": "10\u00d7 18x24 double-sided yard signs + stakes",
+      "description": "10× 18x24 double-sided yard signs + stakes",
       "moneyIn": 0,
       "moneyOut": 199.5
     },
@@ -157,9 +157,150 @@
       "type": "Expense",
       "vendor": "Netlify",
       "category": "Website / Software",
-      "description": "Netlify Personal plan \u2014 gpcl-employee-ops hosting (recurring $9/mo)",
+      "description": "Netlify Personal plan — gpcl-employee-ops hosting (recurring $9/mo)",
       "moneyIn": 0,
       "moneyOut": 9
     }
-  ]
+  ],
+  "plannedIncome": {
+    "jobs": [
+      {
+        "customer": "Mikayla Braun",
+        "address": "8004 Juliette Dr, McKinney, TX 75071",
+        "quoteId": "GPCL-SIL-JULIETTE-2026-11-01 (confirm)",
+        "installDate": "2026-11-01",
+        "quotedPreTax": 100,
+        "collected": 0,
+        "stillExpected": 100,
+        "deposit": 0,
+        "taxTreatment": "Nontaxable rehang (customer buys own materials). Austin confirmed 2026-09-24 7:29 PM CT. $0 tax. If GPCL later sells her any items, that portion is taxable.",
+        "salesTaxExpected": 0,
+        "salesTaxCollected": 0,
+        "jobCosts": 0,
+        "crewPay": 100,
+        "crewPayees": [
+          {
+            "name": "Austin",
+            "amount": 100
+          },
+          {
+            "name": "Doug",
+            "amount": 0
+          }
+        ],
+        "crewPayText": "Austin $100; Doug $0",
+        "flags": [
+          "Placeholder quote ID - confirm",
+          "Amount is an estimate"
+        ]
+      },
+      {
+        "customer": "Jennifer Williams",
+        "address": "4808 CR 1006, McKinney, TX 75071",
+        "quoteId": "ASK AUSTIN (no quote ID)",
+        "installDate": "2026-11-02",
+        "quotedPreTax": 100,
+        "collected": 0,
+        "stillExpected": 100,
+        "deposit": 0,
+        "taxTreatment": "Nontaxable rehang (customer-owned lights). Austin confirmed 2026-09-24 7:29 PM CT. $0 tax.",
+        "salesTaxExpected": 0,
+        "salesTaxCollected": 0,
+        "jobCosts": 0,
+        "crewPay": 100,
+        "crewPayees": [
+          {
+            "name": "Austin",
+            "amount": 100
+          },
+          {
+            "name": "Jace",
+            "amount": 0
+          }
+        ],
+        "crewPayText": "Austin $100; Jace $0",
+        "flags": [
+          "No quote ID yet"
+        ]
+      },
+      {
+        "customer": "Nathan Amos",
+        "address": "8304 Shasta Dr, McKinney, TX 75071",
+        "quoteId": "GPCL-260911-NATH-B0629BE1",
+        "installDate": "2026-11-05",
+        "quotedPreTax": 225,
+        "collected": 0,
+        "stillExpected": 225,
+        "deposit": 0,
+        "taxTreatment": "Nontaxable rehang (customer-owned lights) + grandfathered $0 tax (Quote System Settings B38:B40).",
+        "salesTaxExpected": 0,
+        "salesTaxCollected": 0,
+        "jobCosts": 0,
+        "crewPay": 125,
+        "crewPayees": [
+          {
+            "name": "Doug",
+            "amount": 125
+          }
+        ],
+        "crewPayText": "Doug $125",
+        "flags": []
+      },
+      {
+        "customer": "Dan Bohun",
+        "address": "3907 Colton Dr, McKinney, TX 75071",
+        "quoteId": "GPCL-THUMBTACK-BOHUN-2026-11-06 (confirm)",
+        "installDate": "2026-11-06",
+        "quotedPreTax": 150,
+        "collected": 0,
+        "stillExpected": 150,
+        "deposit": 0,
+        "taxTreatment": "Nontaxable (hang-only service). No sales tax payable.",
+        "salesTaxExpected": 0,
+        "salesTaxCollected": 0,
+        "jobCosts": 24.5,
+        "crewPay": 75,
+        "crewPayees": [
+          {
+            "name": "Doug",
+            "amount": 75
+          }
+        ],
+        "crewPayText": "Doug $75",
+        "flags": [
+          "Placeholder quote ID - confirm",
+          "Amount is expected, not firm"
+        ]
+      },
+      {
+        "customer": "Rachel Grace",
+        "address": "2613 Temple Dr, McKinney, TX 75071",
+        "quoteId": "GPCL-WEB-GRACE-2026-11-13 (confirm)",
+        "installDate": "2026-11-13",
+        "quotedPreTax": 270,
+        "collected": 0,
+        "stillExpected": 270,
+        "deposit": 0,
+        "taxTreatment": "Taxable new install, 8.25% (expected tax $22.28; total $292.28)",
+        "salesTaxExpected": 22.28,
+        "salesTaxCollected": 0,
+        "jobCosts": 0,
+        "crewPay": 100,
+        "crewPayees": [
+          {
+            "name": "Doug",
+            "amount": 100
+          }
+        ],
+        "crewPayText": "Doug $100",
+        "flags": [
+          "Placeholder quote ID - confirm",
+          "Confirm $270 is pre-tax",
+          "Crew pay to confirm"
+        ]
+      }
+    ],
+    "salesTaxRate": 0.0825,
+    "source": "Jobs + Crew Pay Policy tabs"
+  }
 }

@@ -29,6 +29,10 @@ function normalize(data: CashDashboard): CashDashboard {
   if (!Array.isArray(data.categories) || !Array.isArray(data.jobs)) {
     throw new Error('Cash dashboard file is missing categories or jobs')
   }
+  // plannedIncome is optional (older feed/snapshot); drop it if malformed so the page still renders.
+  if (data.plannedIncome && !Array.isArray(data.plannedIncome.jobs)) {
+    delete data.plannedIncome
+  }
   return data
 }
 

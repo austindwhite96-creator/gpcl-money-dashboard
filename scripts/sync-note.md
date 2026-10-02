@@ -44,4 +44,14 @@ Until `dashboardUrl` is set, the app uses the snapshot — nothing breaks.
 }
 ```
 
+Optional `plannedIncome` (added Oct 2026; the app hides the Planned income section if it is missing):
+
+```json
+"plannedIncome": { "jobs": [{ "customer": "", "address": "", "quoteId": "", "installDate": "YYYY-MM-DD",
+  "quotedPreTax": 0, "collected": 0, "stillExpected": 0, "deposit": 0, "salesTaxExpected": 0,
+  "jobCosts": 0, "crewPay": 0, "crewPayees": [{ "name": "", "amount": 0 }], "flags": [] }] }
+```
+
+Built from the Jobs tab + the "Current jobs (planned)" table on Crew Pay Policy (read-only). Sales tax is a liability, never counted.
+
 **Hard** = cash actually in/out. Quoted is not revenue until collected.

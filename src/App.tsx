@@ -10,6 +10,7 @@ import {
 import { loadCashDashboard } from './data/cashDashboard'
 import { formatMargin, formatPay } from './lib/money'
 import { formatSyncedAt, formatTxnDate } from './lib/dates'
+import { PlannedIncome } from './components/PlannedIncome'
 import type { CashDashboard, CategorySpend } from './types'
 
 export default function App() {
@@ -132,6 +133,8 @@ function Dashboard({ data }: { data: CashDashboard }) {
             emphasize
           />
         </div>
+
+        <PlannedIncome data={data} />
 
         <section className="rounded-3xl border border-gpcl-100 bg-white p-5 shadow-sm">
           <h2 className="mb-3 text-sm font-bold uppercase tracking-[0.12em] text-gpcl-600">
@@ -260,7 +263,7 @@ function Dashboard({ data }: { data: CashDashboard }) {
 
         <section className="rounded-3xl border border-gpcl-100 bg-warm-50 p-5">
           <p className="text-sm leading-relaxed text-gpcl-900">
-            <strong>Hard</strong> = cash actually in or out. Quoted is not revenue until collected.
+            <strong>Hard</strong> = cash actually in or out. Quoted is not revenue until collected. <strong>Planned</strong> = what we expect once booked jobs are done.
           </p>
           <p className="mt-2 text-sm text-gpcl-800/80">
             Source: Cash Tracker
