@@ -1,7 +1,7 @@
 {
   "syncedFrom": "GPCL 2026 Cash Tracker",
   "sheetId": "1psIydzf3x-kdWXGmljrcbQlpOZ9wA_WMwrKcakecN0Q",
-  "syncedAt": "2026-10-02T16:15:12.540Z",
+  "syncedAt": "2026-10-02T16:39:56.077Z",
   "hardRevenue": 0,
   "hardExpenses": 773.97,
   "netCashProfit": -773.97,
@@ -86,6 +86,15 @@
       "revenueCollected": 0,
       "hardProfit": 0,
       "notes": "Install Fri 2026-11-13, 1:00-4:00 PM (confirmed by Austin), Doug only. Quoted $270 is PRE-TAX (confirm). Taxable new install at 8.25%: expected tax $22.28, expected total $292.28 (tax is a Sales Tax Payable liability, not revenue). No deposit noted. Planned crew pay (policy only, not paid yet): Doug $100 (at install; confirm). Mockup: GPCL Job Photos 'Rachel Grace 1.jpg'. Address 2613 Temple Dr, McKinney, TX 75071 confirmed by Austin 2026-09-30. No Transactions yet."
+    },
+    {
+      "address": "5706 Pecan Grove Dr, Sachse, TX",
+      "customer": "Cindy W.",
+      "quoteId": "ASK AUSTIN (no quote ID)",
+      "quotedRevenue": 540,
+      "revenueCollected": 0,
+      "hardProfit": 0,
+      "notes": "Install Fri 2026-11-06, 10 AM-12 PM. New install, 120 LF red and white C9. Quote $540.00 PRE-TAX + $44.55 tax (8.25%) = $584.55 total (tax is a Sales Tax Payable liability, not revenue). 50% deposit $292.28 (balance $292.27); NONE received yet. Planned crew pay (policy only, not paid yet): Doug flat $100 at install, $0 takedown; Austin not assigned. Quote ID not provided (do not invent). Added per Austin via App Developer 2026-10-02. No Transactions yet."
     }
   ],
   "recentTransactions": [
@@ -270,6 +279,32 @@
         "flags": [
           "Placeholder quote ID - confirm",
           "Amount is expected, not firm"
+        ]
+      },
+      {
+        "customer": "Cindy W.",
+        "address": "5706 Pecan Grove Dr, Sachse, TX",
+        "quoteId": "ASK AUSTIN (no quote ID)",
+        "installDate": "2026-11-06",
+        "quotedPreTax": 540,
+        "collected": 0,
+        "stillExpected": 540,
+        "deposit": 292.28,
+        "taxTreatment": "Taxable new install, 8.25% (expected tax $44.55; total $584.55)",
+        "salesTaxExpected": 44.55,
+        "salesTaxCollected": 0,
+        "jobCosts": 0,
+        "crewPay": 100,
+        "crewPayees": [
+          {
+            "name": "Doug",
+            "amount": 100
+          }
+        ],
+        "crewPayText": "Doug $100 flat",
+        "flags": [
+          "No quote ID yet",
+          "Crew pay to confirm"
         ]
       },
       {

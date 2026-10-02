@@ -55,3 +55,5 @@ Optional `plannedIncome` (added Oct 2026; the app hides the Planned income secti
 Built from the Jobs tab + the "Current jobs (planned)" table on Crew Pay Policy (read-only). Sales tax is a liability, never counted.
 
 **Hard** = cash actually in/out. Quoted is not revenue until collected.
+
+Planned crew pay **excludes Austin (owner)**: his pay is profit, not a cost. The app subtracts only non-Austin payees; Austin's share stays in "GPCL keeps". Jobs added to the Jobs tab (with a Crew Pay Policy row) flow in automatically.

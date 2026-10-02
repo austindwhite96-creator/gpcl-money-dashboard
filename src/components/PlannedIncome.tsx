@@ -1,7 +1,7 @@
 import { TrendingUp } from 'lucide-react'
 import { formatPay, formatPayExact } from '../lib/money'
 import { formatTxnDate } from '../lib/dates'
-import { computePlanned, gpclKeeps } from '../lib/planned'
+import { computePlanned, crewCost, gpclKeeps, ownerPay } from '../lib/planned'
 import type { CashDashboard } from '../types'
 
 function Pill({ kind }: { kind: 'actual' | 'planned' }) {
@@ -120,9 +120,10 @@ export function PlannedIncome({ data }: { data: CashDashboard }) {
           label="− Planned crew pay"
           value={`−${formatPayExact(totals.crewStillToPay)}`}
         />
-        {totals.plannedToAustin > 0 ? (
-          <Row label={`of which paid to Austin`} value={formatPayExact(totals.plannedToAustin)} muted />
-        ) : null}
+        <p className="-mt-0.5 pb-1 text-xs italic text-gpcl-800/60">
+          Austin&apos;s pay counted as profit
+          {totals.plannedToAustin > 0 ? ` (${formatPayExact(totals.plannedToAustin)} not subtracted)` : ''}
+        </p>
         {totals.crewPaidSoFar > 0 ? (
           <Row
             label="(crew already paid is in expenses)"
@@ -194,7 +195,7 @@ export function PlannedIncome({ data }: { data: CashDashboard }) {
                       Crew pay
                     </p>
                     <p className="text-base font-bold tabular-nums text-gpcl-900">
-                      {job.crewPay == null ? '—' : formatPay(job.crewPay)}
+                      {crewCost(job) == null ? '—' : formatPay(crewCost(job) as number)}
                     </p>
                   </div>
                   <div>
@@ -204,6 +205,9 @@ export function PlannedIncome({ data }: { data: CashDashboard }) {
                     <p className="text-base font-bold tabular-nums text-gpcl-900">
                       {keeps == null ? '—' : formatPay(keeps)}
                     </p>
+                    {ownerPay(job) > 0 ? (
+                      <p className="text-[10px] text-gpcl-800/60">incl. Austin {formatPay(ownerPay(job))}</p>
+                    ) : null}
                   </div>
                 </div>
                 <p className="mt-2 text-xs text-gpcl-800/70">
@@ -237,7 +241,7 @@ export function PlannedIncome({ data }: { data: CashDashboard }) {
         ) : null}
         <p className="mt-2 text-xs text-gpcl-800/60">
           Planned = quotes and crew pay policy, not cash. “GPCL keeps” = quoted − crew pay, before
-          overhead.
+          overhead. Austin&apos;s pay is not a cost: it stays in GPCL keeps / profit.
         </p>
       </div>
     </section>
