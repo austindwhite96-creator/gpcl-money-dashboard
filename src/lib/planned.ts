@@ -1,4 +1,5 @@
 import type { CashDashboard, PlannedJob } from '../types'
+import { NETLIFY_MONTHS_PROJECTED } from '../config'
 
 export interface PlannedTotals {
   /** ACTUAL */
@@ -53,6 +54,22 @@ export interface Reconciliation {
 }
 
 const round2 = (n: number) => Math.round(n * 100) / 100
+
+const isNetlify = (s: string | undefined) => /netlify/i.test(s || '')
+
+/** Latest Netlify expense in the tracker feed (by date): its amount is the monthly bill to project. */
+export function latestNetlifyCharge(data: CashDashboard): { amount: number; month: string } | null {
+  const hits = (data.recentTransactions ?? [])
+    .filter((t) => isNetlify(t.vendor) && (t.moneyOut || 0) > 0 && /^\d{4}-\d{2}/.test(t.date))
+    .sort((a, b) => a.date.localeCompare(b.date))
+  const last = hits.pop()
+  return last ? { amount: round2(last.moneyOut), month: last.date.slice(0, 7) } : null
+}
+
+function addMonths(ym: string, n: number): string {
+  const i = (monthIndex(ym) ?? 0) + n
+  return `${Math.floor(i / 12)}-${String((i % 12) + 1).padStart(2, '0')}`
+}
 
 /** Pay assigned to Austin (owner) on a job. His income is profit, not a cost. */
 export function ownerPay(job: PlannedJob): number {
@@ -161,11 +178,27 @@ export function computePlanned(data: CashDashboard): PlannedTotals | null {
     .sort()
     .pop()
   const endIdx = monthIndex(lastInstall ?? '')
-  const recurringItems = (data.recurring ?? []).map((r) => {
-    const last = monthIndex(r.lastPostedMonth)
-    const months = endIdx != null && last != null ? Math.max(0, endIdx - last) : 0
-    return { label: r.label, monthly: r.monthly, months, amount: round2(r.monthly * months) }
-  })
+  // Netlify is projected from the tracker's latest Netlify charge, for NETLIFY_MONTHS_PROJECTED months
+  // (src/config.ts; 0 = off). Any other recurring row from the feed (e.g. insurance) still comes from the feed.
+  const recurringItems = (data.recurring ?? [])
+    .filter((r) => !isNetlify(r.label))
+    .map((r) => {
+      const last = monthIndex(r.lastPostedMonth)
+      const months = endIdx != null && last != null ? Math.max(0, endIdx - last) : 0
+      return { label: r.label, monthly: r.monthly, months, amount: round2(r.monthly * months) }
+    })
+  const netlify = latestNetlifyCharge(data)
+  const netlifyMonths = Math.max(0, Math.floor(NETLIFY_MONTHS_PROJECTED))
+  let recurringThrough = lastInstall ? lastInstall.slice(0, 7) : ''
+  if (netlify && netlifyMonths > 0) {
+    recurringItems.unshift({
+      label: 'Netlify',
+      monthly: netlify.amount,
+      months: netlifyMonths,
+      amount: round2(netlify.amount * netlifyMonths),
+    })
+    recurringThrough = addMonths(netlify.month, netlifyMonths)
+  }
   const recurringAhead = round2(recurringItems.reduce((s, r) => s + r.amount, 0))
 
   const projectedBottomLine = round2(
@@ -222,7 +255,7 @@ export function computePlanned(data: CashDashboard): PlannedTotals | null {
     plannedToAustin,
     materialsStillToBuy,
     recurringAhead,
-    recurringThroughMonth: lastInstall ? lastInstall.slice(0, 7) : '',
+    recurringThroughMonth: recurringThrough,
     recurringItems,
     insuranceInTracker,
     jobsMissingMaterials: missingMaterialsJobs.length,

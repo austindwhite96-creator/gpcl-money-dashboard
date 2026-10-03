@@ -8,10 +8,12 @@ import {
   crewCost,
   gpclKeeps,
   jobColumnTotals,
+  latestNetlifyCharge,
   marginPct,
   materialsPending,
   taxStillDue,
 } from '../src/lib/planned.ts'
+import { NETLIFY_MONTHS_PROJECTED } from '../src/config.ts'
 import { formatMoney } from '../src/lib/money.ts'
 import { extractKey } from '../src/lib/accessKey.ts'
 import type { CashDashboard, PlannedJob } from '../src/types.ts'
@@ -58,8 +60,8 @@ test('P1(d) projected bottom line includes materials + recurring that are in the
   // old (CEO) number: 495 + 1340 - 550 crew - 849.10 = 435.90
   assert.equal(t.crewStillToPay, 550)
   assert.equal(t.materialsStillToBuy, 97.5) // Landon only; Cindy $156 pending
-  assert.equal(t.recurringAhead, 18) // Netlify $9 x Oct + Nov
-  assert.equal(t.projectedBottomLine, 320.4) // 435.90 - 97.50 - 18
+  assert.equal(t.recurringAhead, 0) // Netlify -> Free plan Oct 13: no future bills (NETLIFY_MONTHS_PROJECTED = 0)
+  assert.equal(t.projectedBottomLine, 338.4) // 435.90 - 97.50
   assert.equal(t.insuranceInTracker, false)
   assert.equal(t.jobsMissingMaterials, 2) // Cindy, Rachel
 })
@@ -70,8 +72,8 @@ test('P1(d) when Cindy materials + insurance appear they flow in', () => {
   d.recurring!.push({ label: 'Insurer', monthly: 86.58, lastPostedMonth: '2026-10', kind: 'insurance' })
   const t = computePlanned(d)!
   assert.equal(t.materialsStillToBuy, 253.5)
-  assert.equal(t.recurringAhead, 18 + 86.58) // insurance posted Oct => Nov still to come
-  assert.equal(t.projectedBottomLine, 77.82) // 435.90 - 253.50 - 104.58
+  assert.equal(t.recurringAhead, 86.58) // insurance posted Oct => Nov still to come; Netlify not projected
+  assert.equal(t.projectedBottomLine, 95.82) // 435.90 - 253.50 - 86.58
   assert.equal(t.insuranceInTracker, true)
 })
 
@@ -106,10 +108,10 @@ test('breakdown lines add up and list what is not counted', () => {
   assert.match(t.notCounted[2], /Robyn B\..*\$0 quote/)
 })
 
-test('Austin example (live data 2026-10-03): 595 + 1,440 = 2,035 - 650 - 422.50 - 18 - 935.68 = 8.82', () => {
+test('Austin example (live data 2026-10-03): 595 + 1,440 = 2,035 - 650 - 422.50 - 936.27 = 26.23', () => {
   const d: CashDashboard = structuredClone(data)
   d.hardRevenue = 595
-  d.hardExpenses = 935.68
+  d.hardExpenses = 936.27
   const jobs = d.plannedIncome!.jobs
   const find = (name: string) => jobs.find((j) => j.name === name) as PlannedJob
   find('Cindy W.').materialsPlanned = 156
@@ -123,16 +125,16 @@ test('Austin example (live data 2026-10-03): 595 + 1,440 = 2,035 - 650 - 422.50 
   assert.equal(t.plannedRevenue, 2035)
   assert.equal(t.crewStillToPay, 650)
   assert.equal(t.materialsStillToBuy, 422.5)
-  assert.equal(t.recurringAhead, 18)
-  assert.equal(t.projectedBottomLine, 8.82)
+  assert.equal(t.recurringAhead, 0)
+  assert.equal(t.projectedBottomLine, 26.23)
   assert.deepEqual(t.jobsMissingMaterialsNames, [])
   assert.equal(t.notCounted.length, 2) // insurance + Robyn $0 quote
 })
 
-test('reconciliation to job Keeps: 912.68 - 885.86 = 26.82 - 18.00 = 8.82 (computed, not hardcoded)', () => {
+test('reconciliation to job Keeps: 912.68 - 886.45 = 26.23, no upcoming bills (computed, not hardcoded)', () => {
   const d: CashDashboard = structuredClone(data)
   d.hardRevenue = 595
-  d.hardExpenses = 935.68
+  d.hardExpenses = 936.27
   const jobs = d.plannedIncome!.jobs
   const find = (name: string) => jobs.find((j) => j.name === name) as PlannedJob
   find('Cindy W.').materialsPlanned = 156
@@ -147,11 +149,12 @@ test('reconciliation to job Keeps: 912.68 - 885.86 = 26.82 - 18.00 = 8.82 (compu
   assert.equal(otherDirect, 49.82)
   assert.equal(r.keepsTotal, 912.68)
   assert.equal(r.leadFeesInKeeps, 49.82)
-  assert.equal(r.spendingNotTiedToJob, round(d.hardExpenses - otherDirect)) // 935.68 - 49.82
-  assert.equal(r.spendingNotTiedToJob, 885.86)
-  assert.equal(r.beforeUpcomingBills, 26.82)
-  assert.equal(r.upcomingBills, 18)
-  assert.equal(r.endsAt, 8.82)
+  assert.equal(r.spendingNotTiedToJob, round(d.hardExpenses - otherDirect)) // 936.27 - 49.82
+  assert.equal(r.spendingNotTiedToJob, 886.45)
+  assert.equal(r.beforeUpcomingBills, 26.23)
+  assert.equal(r.upcomingBills, 0)
+  assert.equal(r.endsAt, 26.23)
+  assert.equal(t.projectedBottomLine, 26.23)
   assert.equal(r.otherDifference, 0)
   assert.equal(r.endsAt, t.projectedBottomLine)
 })
@@ -173,6 +176,14 @@ test('per-job column totals', () => {
   const c = jobColumnTotals(data.plannedIncome!.jobs)
   assert.equal(c.quoted, round(data.plannedIncome!.jobs.reduce((s, j) => s + j.quotedPreTax, 0)))
   assert.equal(c.keeps, round(c.quoted - c.crew - c.materials - c.leadFees))
+})
+
+test('latest Netlify charge is read from the tracker (9/14 $9.59), used only if months are projected', () => {
+  assert.deepEqual(latestNetlifyCharge(data), { amount: 9.59, month: '2026-09' })
+  const none: CashDashboard = structuredClone(data)
+  none.recentTransactions = none.recentTransactions.filter((t) => t.vendor !== 'Netlify')
+  assert.equal(latestNetlifyCharge(none), null)
+  assert.equal(NETLIFY_MONTHS_PROJECTED, 0) // flip to 2 in src/config.ts to project 2 x 9.59 = 19.18
 })
 
 function round(n: number) {

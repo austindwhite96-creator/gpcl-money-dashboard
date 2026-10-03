@@ -147,6 +147,8 @@ export function PlannedIncome({ data }: { data: CashDashboard }) {
           label="− Planned materials still to buy"
           value={`−${formatMoney(totals.materialsStillToBuy)}`}
         />
+        {totals.recurringAhead > 0 ? (
+          <>
         <Row
           label={`− Recurring bills ahead (${billsLabel})`}
           value={`−${formatMoney(totals.recurringAhead)}`}
@@ -161,6 +163,8 @@ export function PlannedIncome({ data }: { data: CashDashboard }) {
               .join('; ')}
             {totals.recurringThroughMonth ? ` (through ${formatMonth(totals.recurringThroughMonth)})` : ''}
           </Note>
+        ) : null}
+          </>
         ) : null}
         <Row label="− Spent to date" value={`−${formatMoney(totals.expensesToDate)}`} />
         <div className="mt-1 border-t border-amber-200 pt-1">
@@ -200,6 +204,8 @@ export function PlannedIncome({ data }: { data: CashDashboard }) {
             : ''}
           ). Ads, software, tools and permits are not tied to a job.
         </Note>
+        {rec.upcomingBills > 0 ? (
+          <>
         <div className="border-t border-gpcl-100">
           <Row label="= Before upcoming bills" value={formatMoney(rec.beforeUpcomingBills)} bold />
         </div>
@@ -207,6 +213,8 @@ export function PlannedIncome({ data }: { data: CashDashboard }) {
           label={`− Upcoming bills (${billsLabel})`}
           value={`−${formatMoney(rec.upcomingBills)}`}
         />
+          </>
+        ) : null}
         {Math.abs(rec.otherDifference) > 0.005 ? (
           <Row label="± Other differences" value={formatMoney(rec.otherDifference)} muted />
         ) : null}

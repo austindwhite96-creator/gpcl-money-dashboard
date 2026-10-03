@@ -48,5 +48,7 @@ No redeploy for data. Redeploy only when the UI/code changes.
 - Austin's own pay is profit, not a cost. **GPCL keeps** = quoted − crew pay (excluding Austin) − materials − lead fee.
 - Remaining balance = unpaid pre-tax amount + (sales tax expected − sales tax collected).
 - Materials ("Planned Materials" column on Jobs, or an "Expected materials cost about $X" sentence in the job note)
-  and monthly bills (any expense whose description/notes say "recurring $X/mo") flow into the projected bottom line
-  automatically when Bookkeeper adds them. Nothing is guessed.
+  flow into the projected bottom line automatically when Bookkeeper adds them. Other monthly bills (e.g. insurance, a
+  "recurring $X/mo" row) come from the feed's `recurring` list. Netlify is the exception: its projection is
+  `NETLIFY_MONTHS_PROJECTED` in `src/config.ts` x the latest Netlify charge in the tracker. It is 0 now (Netlify goes to
+  the Free plan Oct 13, 2026), so no Netlify bill is projected. Nothing is guessed.

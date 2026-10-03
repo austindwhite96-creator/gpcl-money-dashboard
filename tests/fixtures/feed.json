@@ -1,435 +1,435 @@
 {
- "syncedFrom": "GPCL 2026 Cash Tracker",
- "syncedAt": "2026-10-03T12:39:30.971Z",
- "hardRevenue": 495,
- "hardExpenses": 849.1,
- "netCashProfit": -354.1,
- "cashMargin": -0.7153535354,
- "receiptsNeeded": 1,
- "salesTaxHeld": 40.85,
- "categories": [
-  {
-   "name": "Materials",
-   "total": 0
-  },
-  {
-   "name": "Advertising",
-   "total": 501.49
-  },
-  {
-   "name": "Website / Software",
-   "total": 9
-  },
-  {
-   "name": "Equipment / Tools",
-   "total": 184.61
-  },
-  {
-   "name": "Vehicle / Fuel",
-   "total": 0
-  },
-  {
-   "name": "Subcontract Labor",
-   "total": 0
-  },
-  {
-   "name": "Permits / Fees",
-   "total": 154
-  },
-  {
-   "name": "Other",
-   "total": 0
-  }
- ],
- "jobs": [
-  {
-   "id": "job-2",
-   "name": "Jennifer W.",
-   "jobDate": "2026-10-04",
-   "status": "Booked",
-   "quotedRevenue": 100,
-   "revenueCollected": 0
-  },
-  {
-   "id": "job-7",
-   "name": "Landon C.",
-   "jobDate": "2026-10-12",
-   "status": "Deposit paid",
-   "quotedRevenue": 450,
-   "revenueCollected": 225
-  },
-  {
-   "id": "job-3",
-   "name": "Mikayla B.",
-   "jobDate": "2026-11-01",
-   "status": "Booked",
-   "quotedRevenue": 100,
-   "revenueCollected": 0
-  },
-  {
-   "id": "job-8",
-   "name": "Robyn B.",
-   "jobDate": "2026-11-02",
-   "status": "Free job",
-   "quotedRevenue": 0,
-   "revenueCollected": 0
-  },
-  {
-   "id": "job-1",
-   "name": "Nathan A.",
-   "jobDate": "2026-11-05",
-   "status": "Booked",
-   "quotedRevenue": 225,
-   "revenueCollected": 0
-  },
-  {
-   "id": "job-4",
-   "name": "Dan B.",
-   "jobDate": "2026-11-06",
-   "status": "Booked",
-   "quotedRevenue": 150,
-   "revenueCollected": 0
-  },
-  {
-   "id": "job-6",
-   "name": "Cindy W.",
-   "jobDate": "2026-11-06",
-   "status": "Deposit paid",
-   "quotedRevenue": 540,
-   "revenueCollected": 270
-  },
-  {
-   "id": "job-5",
-   "name": "Rachel G.",
-   "jobDate": "2026-11-13",
-   "status": "Booked",
-   "quotedRevenue": 270,
-   "revenueCollected": 0
-  }
- ],
- "recentTransactions": [
-  {
-   "date": "2026-10-02",
-   "type": "Revenue",
-   "vendor": "Cindy W.",
-   "category": "Deposit Revenue",
-   "description": "50% deposit, pre-tax share ($540 quote x 50%)",
-   "moneyIn": 270,
-   "moneyOut": 0
-  },
-  {
-   "date": "2026-10-02",
-   "type": "Liability",
-   "vendor": "Cindy W.",
-   "category": "Sales Tax Payable",
-   "description": "Sales tax collected on deposit (8.25% share)",
-   "moneyIn": 22.28,
-   "moneyOut": 0
-  },
-  {
-   "date": "2026-10-02",
-   "type": "Revenue",
-   "vendor": "Landon C.",
-   "category": "Deposit Revenue",
-   "description": "50% deposit, pre-tax share ($450 quote x 50%)",
-   "moneyIn": 225,
-   "moneyOut": 0
-  },
-  {
-   "date": "2026-10-02",
-   "type": "Liability",
-   "vendor": "Landon C.",
-   "category": "Sales Tax Payable",
-   "description": "Sales tax collected on deposit (8.25% share)",
-   "moneyIn": 18.57,
-   "moneyOut": 0
-  },
-  {
-   "date": "2026-10-01",
-   "type": "Expense",
-   "vendor": "Thumbtack",
-   "category": "Advertising",
-   "description": "Thumbtack lead fee - Sarah H lead, quoted not booked",
-   "moneyIn": 0,
-   "moneyOut": 24.91
-  },
-  {
-   "date": "2026-10-01",
-   "type": "Expense",
-   "vendor": "Thumbtack",
-   "category": "Advertising",
-   "description": "Thumbtack lead fee - Cindy W. job (Nov 6)",
-   "moneyIn": 0,
-   "moneyOut": 24.91
-  },
-  {
-   "date": "2026-10-01",
-   "type": "Expense",
-   "vendor": "Thumbtack",
-   "category": "Advertising",
-   "description": "Thumbtack lead fee - Dharmesh R. lead, no quote yet",
-   "moneyIn": 0,
-   "moneyOut": 24.9
-  },
-  {
-   "date": "2026-09-30",
-   "type": "Expense",
-   "vendor": "Thumbtack",
-   "category": "Advertising",
-   "description": "Thumbtack lead fee - Dan B. hang job (Nov 6)",
-   "moneyIn": 0,
-   "moneyOut": 24.91
-  },
-  {
-   "date": "2026-09-23",
-   "type": "Expense",
-   "vendor": "Texas Secretary of State (SOSDirect)",
-   "category": "Permits / Fees",
-   "description": "Certificate of Amendment \u2014 name change Alpha Omega Auctions LLC to Green Pastures Christmas Lights LLC",
-   "moneyIn": 0,
-   "moneyOut": 150
-  },
-  {
-   "date": "2026-09-23",
-   "type": "Expense",
-   "vendor": "Texas Secretary of State (SOSDirect)",
-   "category": "Permits / Fees",
-   "description": "SOSDirect name availability searches (GPCL x2) + entity find (Alpha Omega Auctions LLC)",
-   "moneyIn": 0,
-   "moneyOut": 3
-  },
-  {
-   "date": "2026-09-23",
-   "type": "Expense",
-   "vendor": "Texas Secretary of State (SOSDirect)",
-   "category": "Permits / Fees",
-   "description": "SOSDirect entity find (Alpha Omega Auctions LLC)",
-   "moneyIn": 0,
-   "moneyOut": 1
-  },
-  {
-   "date": "2026-09-19",
-   "type": "Expense",
-   "vendor": "UPrinting",
-   "category": "Advertising",
-   "description": "10\u00d7 18x24 double-sided yard signs + stakes",
-   "moneyIn": 0,
-   "moneyOut": 199.5
-  },
-  {
-   "date": "2026-09-11",
-   "type": "Expense",
-   "vendor": "TXF Light Source",
-   "category": "Equipment / Tools",
-   "description": "Pitch Hopper 32\" Black (1) + Socket Wrench w/ Clippers (3)",
-   "moneyIn": 0,
-   "moneyOut": 184.61
-  },
-  {
-   "date": "2026-09-06",
-   "type": "Expense",
-   "vendor": "UPrinting",
-   "category": "Advertising",
-   "description": "1,000 GPCL postcards (5x7 Front and Back)",
-   "moneyIn": 0,
-   "moneyOut": 202.36
-  },
-  {
-   "date": "2026-09-01",
-   "type": "Expense",
-   "vendor": "Netlify",
-   "category": "Website / Software",
-   "description": "Netlify Personal plan \u2014 gpcl-employee-ops hosting (recurring $9/mo)",
-   "moneyIn": 0,
-   "moneyOut": 9
-  }
- ],
- "recurring": [
-  {
-   "label": "Netlify",
-   "monthly": 9,
-   "lastPostedMonth": "2026-09",
-   "kind": "other"
-  }
- ],
- "plannedIncome": {
-  "jobs": [
-   {
-    "id": "job-2",
-    "name": "Jennifer W.",
-    "installDate": "2026-10-04",
-    "quotedPreTax": 100,
-    "collected": 0,
-    "stillExpected": 100,
-    "deposit": 0,
-    "taxable": false,
-    "salesTaxExpected": 0,
-    "salesTaxCollected": 0,
-    "materialsPlanned": 0,
-    "materialsBought": 0,
-    "otherDirect": 0,
-    "crewPay": 100,
-    "ownerPay": 100,
-    "flags": [
-     "No quote ID yet"
-    ],
-    "status": "Booked"
-   },
-   {
-    "id": "job-7",
-    "name": "Landon C.",
-    "installDate": "2026-10-12",
-    "quotedPreTax": 450,
-    "collected": 225,
-    "stillExpected": 225,
-    "deposit": 243.57,
-    "taxable": true,
-    "salesTaxExpected": 37.13,
-    "salesTaxCollected": 18.57,
-    "materialsPlanned": 97.5,
-    "materialsBought": 0,
-    "otherDirect": 0,
-    "crewPay": 150,
-    "ownerPay": 0,
-    "flags": [
-     "No quote ID yet",
-     "Crew pay to confirm"
-    ],
-    "status": "Deposit paid"
-   },
-   {
-    "id": "job-3",
-    "name": "Mikayla B.",
-    "installDate": "2026-11-01",
-    "quotedPreTax": 100,
-    "collected": 0,
-    "stillExpected": 100,
-    "deposit": 0,
-    "taxable": false,
-    "salesTaxExpected": 0,
-    "salesTaxCollected": 0,
-    "materialsPlanned": 0,
-    "materialsBought": 0,
-    "otherDirect": 0,
-    "crewPay": 100,
-    "ownerPay": 100,
-    "flags": [
-     "Placeholder quote ID - confirm",
-     "Amount is an estimate"
-    ],
-    "status": "Booked"
-   },
-   {
-    "id": "job-8",
-    "name": "Robyn B.",
-    "installDate": "2026-11-02",
-    "quotedPreTax": 0,
-    "collected": 0,
-    "stillExpected": 0,
-    "deposit": 0,
-    "taxable": false,
-    "salesTaxExpected": 0,
-    "salesTaxCollected": 0,
-    "materialsPlanned": 0,
-    "materialsBought": 0,
-    "otherDirect": 0,
-    "crewPay": 100,
-    "ownerPay": 100,
-    "flags": [
-     "No quote ID yet",
-     "Crew pay to confirm",
-     "No quoted amount"
-    ],
-    "status": "Free job"
-   },
-   {
-    "id": "job-1",
-    "name": "Nathan A.",
-    "installDate": "2026-11-05",
-    "quotedPreTax": 225,
-    "collected": 0,
-    "stillExpected": 225,
-    "deposit": 0,
-    "taxable": false,
-    "salesTaxExpected": 0,
-    "salesTaxCollected": 0,
-    "materialsPlanned": 0,
-    "materialsBought": 0,
-    "otherDirect": 0,
-    "crewPay": 125,
-    "ownerPay": 0,
-    "flags": [],
-    "status": "Booked"
-   },
-   {
-    "id": "job-4",
-    "name": "Dan B.",
-    "installDate": "2026-11-06",
-    "quotedPreTax": 150,
-    "collected": 0,
-    "stillExpected": 150,
-    "deposit": 0,
-    "taxable": false,
-    "salesTaxExpected": 0,
-    "salesTaxCollected": 0,
-    "materialsPlanned": 0,
-    "materialsBought": 0,
-    "otherDirect": 24.91,
-    "crewPay": 75,
-    "ownerPay": 0,
-    "flags": [
-     "Placeholder quote ID - confirm",
-     "Amount is expected, not firm"
-    ],
-    "status": "Booked"
-   },
-   {
-    "id": "job-6",
-    "name": "Cindy W.",
-    "installDate": "2026-11-06",
-    "quotedPreTax": 540,
-    "collected": 270,
-    "stillExpected": 270,
-    "deposit": 292.28,
-    "taxable": true,
-    "salesTaxExpected": 44.55,
-    "salesTaxCollected": 22.28,
-    "materialsPlanned": 0,
-    "materialsBought": 0,
-    "otherDirect": 24.91,
-    "crewPay": 100,
-    "ownerPay": 0,
-    "flags": [
-     "No quote ID yet",
-     "Crew pay to confirm"
-    ],
-    "status": "Deposit paid"
-   },
-   {
-    "id": "job-5",
-    "name": "Rachel G.",
-    "installDate": "2026-11-13",
-    "quotedPreTax": 270,
-    "collected": 0,
-    "stillExpected": 270,
-    "deposit": 0,
-    "taxable": true,
-    "salesTaxExpected": 22.28,
-    "salesTaxCollected": 0,
-    "materialsPlanned": 0,
-    "materialsBought": 0,
-    "otherDirect": 0,
-    "crewPay": 100,
-    "ownerPay": 0,
-    "flags": [
-     "Placeholder quote ID - confirm",
-     "Confirm $270 is pre-tax",
-     "Crew pay to confirm"
-    ],
-    "status": "Booked"
-   }
+  "syncedFrom": "GPCL 2026 Cash Tracker",
+  "syncedAt": "2026-10-03T12:39:30.971Z",
+  "hardRevenue": 495,
+  "hardExpenses": 849.1,
+  "netCashProfit": -354.1,
+  "cashMargin": -0.7153535354,
+  "receiptsNeeded": 1,
+  "salesTaxHeld": 40.85,
+  "categories": [
+    {
+      "name": "Materials",
+      "total": 0
+    },
+    {
+      "name": "Advertising",
+      "total": 501.49
+    },
+    {
+      "name": "Website / Software",
+      "total": 9
+    },
+    {
+      "name": "Equipment / Tools",
+      "total": 184.61
+    },
+    {
+      "name": "Vehicle / Fuel",
+      "total": 0
+    },
+    {
+      "name": "Subcontract Labor",
+      "total": 0
+    },
+    {
+      "name": "Permits / Fees",
+      "total": 154
+    },
+    {
+      "name": "Other",
+      "total": 0
+    }
   ],
-  "salesTaxRate": 0.0825,
-  "source": "Jobs + Crew Pay Policy tabs"
- }
+  "jobs": [
+    {
+      "id": "job-2",
+      "name": "Jennifer W.",
+      "jobDate": "2026-10-04",
+      "status": "Booked",
+      "quotedRevenue": 100,
+      "revenueCollected": 0
+    },
+    {
+      "id": "job-7",
+      "name": "Landon C.",
+      "jobDate": "2026-10-12",
+      "status": "Deposit paid",
+      "quotedRevenue": 450,
+      "revenueCollected": 225
+    },
+    {
+      "id": "job-3",
+      "name": "Mikayla B.",
+      "jobDate": "2026-11-01",
+      "status": "Booked",
+      "quotedRevenue": 100,
+      "revenueCollected": 0
+    },
+    {
+      "id": "job-8",
+      "name": "Robyn B.",
+      "jobDate": "2026-11-02",
+      "status": "Free job",
+      "quotedRevenue": 0,
+      "revenueCollected": 0
+    },
+    {
+      "id": "job-1",
+      "name": "Nathan A.",
+      "jobDate": "2026-11-05",
+      "status": "Booked",
+      "quotedRevenue": 225,
+      "revenueCollected": 0
+    },
+    {
+      "id": "job-4",
+      "name": "Dan B.",
+      "jobDate": "2026-11-06",
+      "status": "Booked",
+      "quotedRevenue": 150,
+      "revenueCollected": 0
+    },
+    {
+      "id": "job-6",
+      "name": "Cindy W.",
+      "jobDate": "2026-11-06",
+      "status": "Deposit paid",
+      "quotedRevenue": 540,
+      "revenueCollected": 270
+    },
+    {
+      "id": "job-5",
+      "name": "Rachel G.",
+      "jobDate": "2026-11-13",
+      "status": "Booked",
+      "quotedRevenue": 270,
+      "revenueCollected": 0
+    }
+  ],
+  "recentTransactions": [
+    {
+      "date": "2026-10-02",
+      "type": "Revenue",
+      "vendor": "Cindy W.",
+      "category": "Deposit Revenue",
+      "description": "50% deposit, pre-tax share ($540 quote x 50%)",
+      "moneyIn": 270,
+      "moneyOut": 0
+    },
+    {
+      "date": "2026-10-02",
+      "type": "Liability",
+      "vendor": "Cindy W.",
+      "category": "Sales Tax Payable",
+      "description": "Sales tax collected on deposit (8.25% share)",
+      "moneyIn": 22.28,
+      "moneyOut": 0
+    },
+    {
+      "date": "2026-10-02",
+      "type": "Revenue",
+      "vendor": "Landon C.",
+      "category": "Deposit Revenue",
+      "description": "50% deposit, pre-tax share ($450 quote x 50%)",
+      "moneyIn": 225,
+      "moneyOut": 0
+    },
+    {
+      "date": "2026-10-02",
+      "type": "Liability",
+      "vendor": "Landon C.",
+      "category": "Sales Tax Payable",
+      "description": "Sales tax collected on deposit (8.25% share)",
+      "moneyIn": 18.57,
+      "moneyOut": 0
+    },
+    {
+      "date": "2026-10-01",
+      "type": "Expense",
+      "vendor": "Thumbtack",
+      "category": "Advertising",
+      "description": "Thumbtack lead fee - Sarah H lead, quoted not booked",
+      "moneyIn": 0,
+      "moneyOut": 24.91
+    },
+    {
+      "date": "2026-10-01",
+      "type": "Expense",
+      "vendor": "Thumbtack",
+      "category": "Advertising",
+      "description": "Thumbtack lead fee - Cindy W. job (Nov 6)",
+      "moneyIn": 0,
+      "moneyOut": 24.91
+    },
+    {
+      "date": "2026-10-01",
+      "type": "Expense",
+      "vendor": "Thumbtack",
+      "category": "Advertising",
+      "description": "Thumbtack lead fee - Dharmesh R. lead, no quote yet",
+      "moneyIn": 0,
+      "moneyOut": 24.9
+    },
+    {
+      "date": "2026-09-30",
+      "type": "Expense",
+      "vendor": "Thumbtack",
+      "category": "Advertising",
+      "description": "Thumbtack lead fee - Dan B. hang job (Nov 6)",
+      "moneyIn": 0,
+      "moneyOut": 24.91
+    },
+    {
+      "date": "2026-09-23",
+      "type": "Expense",
+      "vendor": "Texas Secretary of State (SOSDirect)",
+      "category": "Permits / Fees",
+      "description": "Certificate of Amendment — name change Alpha Omega Auctions LLC to Green Pastures Christmas Lights LLC",
+      "moneyIn": 0,
+      "moneyOut": 150
+    },
+    {
+      "date": "2026-09-23",
+      "type": "Expense",
+      "vendor": "Texas Secretary of State (SOSDirect)",
+      "category": "Permits / Fees",
+      "description": "SOSDirect name availability searches (GPCL x2) + entity find (Alpha Omega Auctions LLC)",
+      "moneyIn": 0,
+      "moneyOut": 3
+    },
+    {
+      "date": "2026-09-23",
+      "type": "Expense",
+      "vendor": "Texas Secretary of State (SOSDirect)",
+      "category": "Permits / Fees",
+      "description": "SOSDirect entity find (Alpha Omega Auctions LLC)",
+      "moneyIn": 0,
+      "moneyOut": 1
+    },
+    {
+      "date": "2026-09-19",
+      "type": "Expense",
+      "vendor": "UPrinting",
+      "category": "Advertising",
+      "description": "10× 18x24 double-sided yard signs + stakes",
+      "moneyIn": 0,
+      "moneyOut": 199.5
+    },
+    {
+      "date": "2026-09-11",
+      "type": "Expense",
+      "vendor": "TXF Light Source",
+      "category": "Equipment / Tools",
+      "description": "Pitch Hopper 32\" Black (1) + Socket Wrench w/ Clippers (3)",
+      "moneyIn": 0,
+      "moneyOut": 184.61
+    },
+    {
+      "date": "2026-09-06",
+      "type": "Expense",
+      "vendor": "UPrinting",
+      "category": "Advertising",
+      "description": "1,000 GPCL postcards (5x7 Front and Back)",
+      "moneyIn": 0,
+      "moneyOut": 202.36
+    },
+    {
+      "date": "2026-09-14",
+      "type": "Expense",
+      "vendor": "Netlify",
+      "category": "Website / Software",
+      "description": "Netlify Personal plan — gpcl-employee-ops hosting (monthly)",
+      "moneyIn": 0,
+      "moneyOut": 9.59
+    }
+  ],
+  "recurring": [
+    {
+      "label": "Netlify",
+      "monthly": 9,
+      "lastPostedMonth": "2026-09",
+      "kind": "other"
+    }
+  ],
+  "plannedIncome": {
+    "jobs": [
+      {
+        "id": "job-2",
+        "name": "Jennifer W.",
+        "installDate": "2026-10-04",
+        "quotedPreTax": 100,
+        "collected": 0,
+        "stillExpected": 100,
+        "deposit": 0,
+        "taxable": false,
+        "salesTaxExpected": 0,
+        "salesTaxCollected": 0,
+        "materialsPlanned": 0,
+        "materialsBought": 0,
+        "otherDirect": 0,
+        "crewPay": 100,
+        "ownerPay": 100,
+        "flags": [
+          "No quote ID yet"
+        ],
+        "status": "Booked"
+      },
+      {
+        "id": "job-7",
+        "name": "Landon C.",
+        "installDate": "2026-10-12",
+        "quotedPreTax": 450,
+        "collected": 225,
+        "stillExpected": 225,
+        "deposit": 243.57,
+        "taxable": true,
+        "salesTaxExpected": 37.13,
+        "salesTaxCollected": 18.57,
+        "materialsPlanned": 97.5,
+        "materialsBought": 0,
+        "otherDirect": 0,
+        "crewPay": 150,
+        "ownerPay": 0,
+        "flags": [
+          "No quote ID yet",
+          "Crew pay to confirm"
+        ],
+        "status": "Deposit paid"
+      },
+      {
+        "id": "job-3",
+        "name": "Mikayla B.",
+        "installDate": "2026-11-01",
+        "quotedPreTax": 100,
+        "collected": 0,
+        "stillExpected": 100,
+        "deposit": 0,
+        "taxable": false,
+        "salesTaxExpected": 0,
+        "salesTaxCollected": 0,
+        "materialsPlanned": 0,
+        "materialsBought": 0,
+        "otherDirect": 0,
+        "crewPay": 100,
+        "ownerPay": 100,
+        "flags": [
+          "Placeholder quote ID - confirm",
+          "Amount is an estimate"
+        ],
+        "status": "Booked"
+      },
+      {
+        "id": "job-8",
+        "name": "Robyn B.",
+        "installDate": "2026-11-02",
+        "quotedPreTax": 0,
+        "collected": 0,
+        "stillExpected": 0,
+        "deposit": 0,
+        "taxable": false,
+        "salesTaxExpected": 0,
+        "salesTaxCollected": 0,
+        "materialsPlanned": 0,
+        "materialsBought": 0,
+        "otherDirect": 0,
+        "crewPay": 100,
+        "ownerPay": 100,
+        "flags": [
+          "No quote ID yet",
+          "Crew pay to confirm",
+          "No quoted amount"
+        ],
+        "status": "Free job"
+      },
+      {
+        "id": "job-1",
+        "name": "Nathan A.",
+        "installDate": "2026-11-05",
+        "quotedPreTax": 225,
+        "collected": 0,
+        "stillExpected": 225,
+        "deposit": 0,
+        "taxable": false,
+        "salesTaxExpected": 0,
+        "salesTaxCollected": 0,
+        "materialsPlanned": 0,
+        "materialsBought": 0,
+        "otherDirect": 0,
+        "crewPay": 125,
+        "ownerPay": 0,
+        "flags": [],
+        "status": "Booked"
+      },
+      {
+        "id": "job-4",
+        "name": "Dan B.",
+        "installDate": "2026-11-06",
+        "quotedPreTax": 150,
+        "collected": 0,
+        "stillExpected": 150,
+        "deposit": 0,
+        "taxable": false,
+        "salesTaxExpected": 0,
+        "salesTaxCollected": 0,
+        "materialsPlanned": 0,
+        "materialsBought": 0,
+        "otherDirect": 24.91,
+        "crewPay": 75,
+        "ownerPay": 0,
+        "flags": [
+          "Placeholder quote ID - confirm",
+          "Amount is expected, not firm"
+        ],
+        "status": "Booked"
+      },
+      {
+        "id": "job-6",
+        "name": "Cindy W.",
+        "installDate": "2026-11-06",
+        "quotedPreTax": 540,
+        "collected": 270,
+        "stillExpected": 270,
+        "deposit": 292.28,
+        "taxable": true,
+        "salesTaxExpected": 44.55,
+        "salesTaxCollected": 22.28,
+        "materialsPlanned": 0,
+        "materialsBought": 0,
+        "otherDirect": 24.91,
+        "crewPay": 100,
+        "ownerPay": 0,
+        "flags": [
+          "No quote ID yet",
+          "Crew pay to confirm"
+        ],
+        "status": "Deposit paid"
+      },
+      {
+        "id": "job-5",
+        "name": "Rachel G.",
+        "installDate": "2026-11-13",
+        "quotedPreTax": 270,
+        "collected": 0,
+        "stillExpected": 270,
+        "deposit": 0,
+        "taxable": true,
+        "salesTaxExpected": 22.28,
+        "salesTaxCollected": 0,
+        "materialsPlanned": 0,
+        "materialsBought": 0,
+        "otherDirect": 0,
+        "crewPay": 100,
+        "ownerPay": 0,
+        "flags": [
+          "Placeholder quote ID - confirm",
+          "Confirm $270 is pre-tax",
+          "Crew pay to confirm"
+        ],
+        "status": "Booked"
+      }
+    ],
+    "salesTaxRate": 0.0825,
+    "source": "Jobs + Crew Pay Policy tabs"
+  }
 }
