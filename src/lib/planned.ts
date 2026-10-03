@@ -21,6 +21,11 @@ export interface PlannedTotals {
   insuranceInTracker: boolean
   /** Booked taxable installs whose materials are not in the tracker yet (so they are not counted). */
   jobsMissingMaterials: number
+  jobsMissingMaterialsNames: string[]
+  /** Booked jobs with no quoted amount ($0 quote): they add no revenue yet. */
+  zeroQuoteJobNames: string[]
+  /** Plain-English list of what is NOT counted in the projection yet. */
+  notCounted: string[]
   projectedBottomLine: number
   /** Sales tax: liability, never income. */
   salesTaxTotalExpected: number
@@ -85,6 +90,25 @@ export function balanceDue(job: PlannedJob): number {
   return round2((job.stillExpected || 0) + taxStillDue(job))
 }
 
+export interface JobColumnTotals {
+  quoted: number
+  crew: number
+  materials: number
+  leadFees: number
+  keeps: number
+}
+
+/** Column totals for the per-job table (jobs with no crew pay row count as $0 crew and are left out of keeps). */
+export function jobColumnTotals(jobs: PlannedJob[]): JobColumnTotals {
+  return {
+    quoted: round2(jobs.reduce((s, j) => s + (j.quotedPreTax || 0), 0)),
+    crew: round2(jobs.reduce((s, j) => s + (crewCost(j) ?? 0), 0)),
+    materials: round2(jobs.reduce((s, j) => s + materialsCost(j), 0)),
+    leadFees: round2(jobs.reduce((s, j) => s + leadFee(j), 0)),
+    keeps: round2(jobs.reduce((s, j) => s + (gpclKeeps(j) ?? 0), 0)),
+  }
+}
+
 function monthIndex(ym: string): number | null {
   const m = /^(\d{4})-(\d{2})/.exec(ym || '')
   return m ? Number(m[1]) * 12 + Number(m[2]) - 1 : null
@@ -131,6 +155,17 @@ export function computePlanned(data: CashDashboard): PlannedTotals | null {
     plannedRevenue - crewStillToPay - materialsStillToBuy - recurringAhead - data.hardExpenses,
   )
 
+  const insuranceInTracker = (data.recurring ?? []).some((r) => r.kind === 'insurance')
+  const missingMaterialsJobs = jobs.filter(materialsPending)
+  const zeroQuoteJobNames = jobs.filter((j) => !(j.quotedPreTax > 0)).map((j) => j.name)
+  const notCounted: string[] = []
+  if (!insuranceInTracker) notCounted.push('insurance (no recurring entry in the tracker)')
+  if (missingMaterialsJobs.length > 0)
+    notCounted.push(
+      `materials for ${missingMaterialsJobs.length} taxable install${missingMaterialsJobs.length === 1 ? '' : 's'} (${missingMaterialsJobs.map((j) => j.name).join(', ')})`,
+    )
+  for (const name of zeroQuoteJobNames) notCounted.push(`${name} has a $0 quote (adds no revenue)`)
+
   const salesTaxTotalExpected = round2(jobs.reduce((s, j) => s + (j.salesTaxExpected || 0), 0))
   const salesTaxStillToCollect = round2(jobs.reduce((s, j) => s + taxStillDue(j), 0))
 
@@ -148,8 +183,11 @@ export function computePlanned(data: CashDashboard): PlannedTotals | null {
     recurringAhead,
     recurringThroughMonth: lastInstall ? lastInstall.slice(0, 7) : '',
     recurringItems,
-    insuranceInTracker: (data.recurring ?? []).some((r) => r.kind === 'insurance'),
-    jobsMissingMaterials: jobs.filter(materialsPending).length,
+    insuranceInTracker,
+    jobsMissingMaterials: missingMaterialsJobs.length,
+    jobsMissingMaterialsNames: missingMaterialsJobs.map((j) => j.name),
+    zeroQuoteJobNames,
+    notCounted,
     projectedBottomLine,
     salesTaxTotalExpected,
     salesTaxStillToCollect,

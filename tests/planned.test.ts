@@ -7,6 +7,7 @@ import {
   computePlanned,
   crewCost,
   gpclKeeps,
+  jobColumnTotals,
   marginPct,
   materialsPending,
   taxStillDue,
@@ -89,3 +90,51 @@ test('access key extraction', () => {
   assert.equal(extractKey('short'), '')
   assert.equal(extractKey(''), '')
 })
+
+test('breakdown lines add up and list what is not counted', () => {
+  const t = computePlanned(data)!
+  assert.equal(round(t.collectedSoFar + t.stillExpected), t.plannedRevenue)
+  assert.equal(
+    round(t.plannedRevenue - t.crewStillToPay - t.materialsStillToBuy - t.recurringAhead - t.expensesToDate),
+    t.projectedBottomLine,
+  )
+  assert.deepEqual(t.zeroQuoteJobNames, ['Robyn B.'])
+  assert.deepEqual(t.jobsMissingMaterialsNames, ['Cindy W.', 'Rachel G.'])
+  assert.equal(t.notCounted.length, 3) // insurance, materials for 2 installs, Robyn $0 quote
+  assert.match(t.notCounted[0], /insurance/)
+  assert.match(t.notCounted[1], /Cindy W\., Rachel G\./)
+  assert.match(t.notCounted[2], /Robyn B\..*\$0 quote/)
+})
+
+test('Austin example (live data 2026-10-03): 595 + 1,440 = 2,035 - 650 - 422.50 - 18 - 935.68 = 8.82', () => {
+  const d: CashDashboard = structuredClone(data)
+  d.hardRevenue = 595
+  d.hardExpenses = 935.68
+  const jobs = d.plannedIncome!.jobs
+  const find = (name: string) => jobs.find((j) => j.name === name) as PlannedJob
+  find('Cindy W.').materialsPlanned = 156
+  find('Rachel G.').materialsPlanned = 130
+  jobs.push({
+    ...find('Nathan A.'), id: 'job-9', name: 'Will S.', quotedPreTax: 200, stillExpected: 100,
+    taxable: true, materialsPlanned: 39, crewPay: 100, ownerPay: 0, installDate: '2026-11-07',
+  })
+  const t = computePlanned(d)!
+  assert.equal(t.stillExpected, 1440)
+  assert.equal(t.plannedRevenue, 2035)
+  assert.equal(t.crewStillToPay, 650)
+  assert.equal(t.materialsStillToBuy, 422.5)
+  assert.equal(t.recurringAhead, 18)
+  assert.equal(t.projectedBottomLine, 8.82)
+  assert.deepEqual(t.jobsMissingMaterialsNames, [])
+  assert.equal(t.notCounted.length, 2) // insurance + Robyn $0 quote
+})
+
+test('per-job column totals', () => {
+  const c = jobColumnTotals(data.plannedIncome!.jobs)
+  assert.equal(c.quoted, round(data.plannedIncome!.jobs.reduce((s, j) => s + j.quotedPreTax, 0)))
+  assert.equal(c.keeps, round(c.quoted - c.crew - c.materials - c.leadFees))
+})
+
+function round(n: number) {
+  return Math.round(n * 100) / 100
+}
