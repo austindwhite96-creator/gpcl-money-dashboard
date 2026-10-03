@@ -129,6 +129,46 @@ test('Austin example (live data 2026-10-03): 595 + 1,440 = 2,035 - 650 - 422.50 
   assert.equal(t.notCounted.length, 2) // insurance + Robyn $0 quote
 })
 
+test('reconciliation to job Keeps: 912.68 - 885.86 = 26.82 - 18.00 = 8.82 (computed, not hardcoded)', () => {
+  const d: CashDashboard = structuredClone(data)
+  d.hardRevenue = 595
+  d.hardExpenses = 935.68
+  const jobs = d.plannedIncome!.jobs
+  const find = (name: string) => jobs.find((j) => j.name === name) as PlannedJob
+  find('Cindy W.').materialsPlanned = 156
+  find('Rachel G.').materialsPlanned = 130
+  jobs.push({
+    ...find('Nathan A.'), id: 'job-9', name: 'Will S.', quotedPreTax: 200, stillExpected: 100,
+    taxable: true, materialsPlanned: 39, crewPay: 100, ownerPay: 0, installDate: '2026-11-07', otherDirect: 0,
+  })
+  const t = computePlanned(d)!
+  const r = t.reconciliation
+  const otherDirect = round(jobs.reduce((s, j) => s + j.otherDirect, 0))
+  assert.equal(otherDirect, 49.82)
+  assert.equal(r.keepsTotal, 912.68)
+  assert.equal(r.leadFeesInKeeps, 49.82)
+  assert.equal(r.spendingNotTiedToJob, round(d.hardExpenses - otherDirect)) // 935.68 - 49.82
+  assert.equal(r.spendingNotTiedToJob, 885.86)
+  assert.equal(r.beforeUpcomingBills, 26.82)
+  assert.equal(r.upcomingBills, 18)
+  assert.equal(r.endsAt, 8.82)
+  assert.equal(r.otherDifference, 0)
+  assert.equal(r.endsAt, t.projectedBottomLine)
+})
+
+test('reconciliation still ties once crew is paid and materials are bought', () => {
+  const d: CashDashboard = structuredClone(data)
+  const jobs = d.plannedIncome!.jobs
+  d.hardRevenue = round(jobs.reduce((s, j) => s + j.quotedPreTax - j.stillExpected, 0)) // collected + still expected = quoted
+  jobs.find((j) => j.name === 'Landon C.')!.materialsBought = 97.5
+  d.categories.find((c) => /subcontract/i.test(c.name))!.total = 150
+  d.hardExpenses = 849.1 + 150 + 97.5
+  const t = computePlanned(d)!
+  assert.equal(t.reconciliation.spendingNotTiedToJob, 849.1 - 49.82)
+  assert.equal(t.reconciliation.otherDifference, 0)
+  assert.equal(t.reconciliation.endsAt, t.projectedBottomLine)
+})
+
 test('per-job column totals', () => {
   const c = jobColumnTotals(data.plannedIncome!.jobs)
   assert.equal(c.quoted, round(data.plannedIncome!.jobs.reduce((s, j) => s + j.quotedPreTax, 0)))

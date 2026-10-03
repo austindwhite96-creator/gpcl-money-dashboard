@@ -27,12 +27,29 @@ export interface PlannedTotals {
   /** Plain-English list of what is NOT counted in the projection yet. */
   notCounted: string[]
   projectedBottomLine: number
+  /** Reconciliation of the projected bottom line to the per-job Keeps column. */
+  reconciliation: Reconciliation
   /** Sales tax: liability, never income. */
   salesTaxTotalExpected: number
   salesTaxStillToCollect: number
   salesTaxHeld: number
   jobCount: number
   missingCrewPay: number
+}
+
+export interface Reconciliation {
+  /** Sum of GPCL keeps over all jobs (the per-job column total). */
+  keepsTotal: number
+  /** Job lead fees (otherDirect) already netted inside Keeps. */
+  leadFeesInKeeps: number
+  /** Spent to date that is NOT inside any job's Keeps: ads, software, tools, permits… */
+  spendingNotTiedToJob: number
+  beforeUpcomingBills: number
+  upcomingBills: number
+  /** Keeps − spending not tied to a job − upcoming bills. Equals the projected bottom line when everything ties. */
+  endsAt: number
+  /** Any leftover (e.g. a job with no crew pay row) so the block always adds up to the projected bottom line. */
+  otherDifference: number
 }
 
 const round2 = (n: number) => Math.round(n * 100) / 100
@@ -155,6 +172,30 @@ export function computePlanned(data: CashDashboard): PlannedTotals | null {
     plannedRevenue - crewStillToPay - materialsStillToBuy - recurringAhead - data.hardExpenses,
   )
 
+  // Reconciliation to per-job Keeps. Keeps already nets each job's planned crew (excl. owner),
+  // materials (max of planned/bought) and lead fee, so the part of "spent to date" that is
+  // inside Keeps is: lead fees + crew already paid (capped at planned) + materials already bought.
+  // Everything else spent is "not tied to a job". With nothing paid to crew and no materials bought
+  // yet this is exactly hardExpenses − sum(otherDirect).
+  const keepsTotal = jobColumnTotals(jobs).keeps
+  const leadFeesInKeeps = round2(jobs.reduce((s, j) => s + leadFee(j), 0))
+  const crewInKeeps = Math.min(plannedCrewPay, crewPaidSoFar)
+  const materialsBoughtTotal = round2(jobs.reduce((s, j) => s + (j.materialsBought || 0), 0))
+  const spendingNotTiedToJob = round2(
+    data.hardExpenses - leadFeesInKeeps - crewInKeeps - materialsBoughtTotal,
+  )
+  const beforeUpcomingBills = round2(keepsTotal - spendingNotTiedToJob)
+  const endsAt = round2(beforeUpcomingBills - recurringAhead)
+  const reconciliation: Reconciliation = {
+    keepsTotal,
+    leadFeesInKeeps,
+    spendingNotTiedToJob,
+    beforeUpcomingBills,
+    upcomingBills: recurringAhead,
+    endsAt,
+    otherDifference: round2(projectedBottomLine - endsAt),
+  }
+
   const insuranceInTracker = (data.recurring ?? []).some((r) => r.kind === 'insurance')
   const missingMaterialsJobs = jobs.filter(materialsPending)
   const zeroQuoteJobNames = jobs.filter((j) => !(j.quotedPreTax > 0)).map((j) => j.name)
@@ -189,6 +230,7 @@ export function computePlanned(data: CashDashboard): PlannedTotals | null {
     zeroQuoteJobNames,
     notCounted,
     projectedBottomLine,
+    reconciliation,
     salesTaxTotalExpected,
     salesTaxStillToCollect,
     salesTaxHeld: data.salesTaxHeld ?? 0,

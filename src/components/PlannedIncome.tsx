@@ -85,6 +85,7 @@ export function PlannedIncome({ data }: { data: CashDashboard }) {
     dateSortKey(a.installDate).localeCompare(dateSortKey(b.installDate)),
   )
   const negative = totals.projectedBottomLine < 0
+  const rec = totals.reconciliation
   const colTotals = jobColumnTotals(planned.jobs)
   const billsLabel = totals.recurringItems.length
     ? totals.recurringItems.map((r) => r.label).join(', ')
@@ -178,6 +179,47 @@ export function PlannedIncome({ data }: { data: CashDashboard }) {
           Revenue is before sales tax. Sales tax is owed to the state, so it is <strong>not</strong>{' '}
           counted as income: {formatMoney(totals.salesTaxStillToCollect)} still to collect (of{' '}
           {formatMoney(totals.salesTaxTotalExpected)} total expected on these jobs).
+        </p>
+      </div>
+
+      {/* How the projected bottom line ties to the per-job Keeps */}
+      <div className="rounded-2xl border border-gpcl-100 bg-gpcl-50/40 p-4">
+        <p className="mb-1 text-xs font-bold uppercase tracking-[0.12em] text-gpcl-700">
+          How this ties to the job Keeps
+        </p>
+        <Row label="Keeps total (all jobs)" value={formatMoney(rec.keepsTotal)} />
+        <Row
+          label="− Spending not tied to a job"
+          value={`−${formatMoney(rec.spendingNotTiedToJob)}`}
+        />
+        <Note>
+          Spent to date {formatMoney(totals.expensesToDate)} minus the part already inside Keeps
+          (job lead fees {formatMoney(rec.leadFeesInKeeps)}
+          {totals.expensesToDate - rec.spendingNotTiedToJob - rec.leadFeesInKeeps > 0.005
+            ? ', crew already paid and materials already bought'
+            : ''}
+          ). Ads, software, tools and permits are not tied to a job.
+        </Note>
+        <div className="border-t border-gpcl-100">
+          <Row label="= Before upcoming bills" value={formatMoney(rec.beforeUpcomingBills)} bold />
+        </div>
+        <Row
+          label={`− Upcoming bills (${billsLabel})`}
+          value={`−${formatMoney(rec.upcomingBills)}`}
+        />
+        {Math.abs(rec.otherDifference) > 0.005 ? (
+          <Row label="± Other differences" value={formatMoney(rec.otherDifference)} muted />
+        ) : null}
+        <div className="mt-1 border-t border-gpcl-100 pt-1">
+          <Row
+            label="= Projected bottom line"
+            value={formatMoney(totals.projectedBottomLine)}
+            bold
+            negative={negative}
+          />
+        </div>
+        <p className="mt-2 text-xs leading-relaxed text-gpcl-800/75">
+          Job lead fees are already inside Keeps, so they are not subtracted twice.
         </p>
       </div>
 
