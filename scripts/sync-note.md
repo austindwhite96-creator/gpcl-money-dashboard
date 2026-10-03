@@ -2,58 +2,51 @@
 
 **Source of truth:** Google Sheet [GPCL 2026 Cash Tracker](https://docs.google.com/spreadsheets/d/1psIydzf3x-kdWXGmljrcbQlpOZ9wA_WMwrKcakecN0Q)
 
-## Live feed (preferred)
+## Private live feed
 
-Apps Script Web App reads Dashboard / Transactions / Jobs and returns JSON (same shape as below).  
-Money Dashboard loads `public/config.json` → `dashboardUrl` first, then falls back to the bundled snapshot `public/cash-dashboard.json`.
+An Apps Script Web App reads the Dashboard / Transactions / Jobs / Crew Pay Policy tabs (read-only) and returns JSON.
+The page loads `public/config.json` → `dashboardUrl` and sends `?key=<access key>`.
 
-**Austin going forward**
+- The feed answers `{"error":"unauthorized"}` (no data) unless the key matches the `DASHBOARD_KEY` Script Property.
+- The feed strips phone numbers, emails, street addresses, raw Notes, quote IDs and crew names on the server.
+- There is **no bundled snapshot** any more. A snapshot in a public repo is public data.
+- The key is **never** in this repo or in the built page. Austin opens his personal link once
+  (`…/gpcl-money-dashboard/#k=<key>`); the page saves the key in the browser and removes it from the address bar.
+  Without a key the page only shows "Enter access key".
+
+Cutover steps: `/workspace/gpcl-dashboard-preview/CUTOVER.md`.
+
+## Data going forward
 
 1. Edit the Cash Tracker sheet (deposits, expenses, job payments).
-2. Wait about **1 minute**.
-3. Refresh Money Dashboard in the browser.
+2. Wait about **1 minute** (the feed caches for 60 seconds).
+3. Reopen the Money Dashboard.
 
-**No redeploy for data.** Redeploy only when the UI/code changes.
+No redeploy for data. Redeploy only when the UI/code changes.
 
-One-time: paste the Web App `/exec` URL into `public/config.json` as `dashboardUrl`, then redeploy once.  
-Script source + deploy steps: `/workspace/gpcl-live-feeds/README.md`.
-
-Until `dashboardUrl` is set, the app uses the snapshot — nothing breaks.
-
-## Snapshot fallback
-
-`public/cash-dashboard.json` is a backup copy. Keep it roughly in sync when you can, but it is **not** required for day-to-day sheet edits once the live URL is set.
-
-~~Tell App Developer “refresh the dashboard”~~ — **not needed for data anymore.**
-
-## Shape of the JSON
+## Shape of the JSON (sanitized)
 
 ```json
 {
-  "syncedFrom": "GPCL 2026 Cash Tracker",
-  "sheetId": "1psIydzf3x-kdWXGmljrcbQlpOZ9wA_WMwrKcakecN0Q",
-  "syncedAt": "ISO-8601",
-  "hardRevenue": 0,
-  "hardExpenses": 0,
-  "netCashProfit": 0,
-  "cashMargin": null,
-  "receiptsNeeded": 0,
+  "syncedFrom": "GPCL 2026 Cash Tracker", "syncedAt": "ISO-8601",
+  "hardRevenue": 0, "hardExpenses": 0, "netCashProfit": 0, "cashMargin": null, "receiptsNeeded": 0,
+  "salesTaxHeld": 0,
   "categories": [{ "name": "Materials", "total": 0 }],
-  "jobs": [{ "address": "", "customer": "", "quoteId": "", "quotedRevenue": 0, "revenueCollected": 0, "hardProfit": 0, "notes": "" }],
-  "recentTransactions": [{ "date": "YYYY-MM-DD", "type": "Expense", "vendor": "", "category": "", "description": "", "moneyIn": 0, "moneyOut": 0 }]
+  "jobs": [{ "id": "job-1", "name": "Dan B.", "jobDate": "YYYY-MM-DD", "status": "Booked", "quotedRevenue": 0, "revenueCollected": 0 }],
+  "recentTransactions": [{ "date": "YYYY-MM-DD", "type": "Expense", "vendor": "", "category": "", "description": "", "moneyIn": 0, "moneyOut": 0 }],
+  "recurring": [{ "label": "Netlify", "monthly": 9, "lastPostedMonth": "YYYY-MM", "kind": "other" }],
+  "plannedIncome": { "jobs": [{ "id": "", "name": "", "installDate": "", "status": "", "quotedPreTax": 0, "collected": 0,
+    "stillExpected": 0, "deposit": 0, "taxable": false, "salesTaxExpected": 0, "salesTaxCollected": 0,
+    "materialsPlanned": 0, "materialsBought": 0, "otherDirect": 0, "crewPay": 0, "ownerPay": 0, "flags": [] }] }
 }
 ```
 
-Optional `plannedIncome` (added Oct 2026; the app hides the Planned income section if it is missing):
+## Money rules on the page
 
-```json
-"plannedIncome": { "jobs": [{ "customer": "", "address": "", "quoteId": "", "installDate": "YYYY-MM-DD",
-  "quotedPreTax": 0, "collected": 0, "stillExpected": 0, "deposit": 0, "salesTaxExpected": 0,
-  "jobCosts": 0, "crewPay": 0, "crewPayees": [{ "name": "", "amount": 0 }], "flags": [] }] }
-```
-
-Built from the Jobs tab + the "Current jobs (planned)" table on Crew Pay Policy (read-only). Sales tax is a liability, never counted.
-
-**Hard** = cash actually in/out. Quoted is not revenue until collected.
-
-Planned crew pay **excludes Austin (owner)**: his pay is profit, not a cost. The app subtracts only non-Austin payees; Austin's share stays in "GPCL keeps". Jobs added to the Jobs tab (with a Crew Pay Policy row) flow in automatically.
+- **Hard** = cash actually in/out. Quoted is not revenue until collected.
+- Sales tax is a liability owed to the state, never revenue ("Held for the state").
+- Austin's own pay is profit, not a cost. **GPCL keeps** = quoted − crew pay (excluding Austin) − materials − lead fee.
+- Remaining balance = unpaid pre-tax amount + (sales tax expected − sales tax collected).
+- Materials ("Planned Materials" column on Jobs, or an "Expected materials cost about $X" sentence in the job note)
+  and monthly bills (any expense whose description/notes say "recurring $X/mo") flow into the projected bottom line
+  automatically when Bookkeeper adds them. Nothing is guessed.

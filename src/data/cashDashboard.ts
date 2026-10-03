@@ -1,6 +1,12 @@
 import type { CashDashboard } from '../types'
 
-const LOCAL_DASHBOARD = 'cash-dashboard.json'
+/** The feed said no (missing / wrong key). */
+export class UnauthorizedError extends Error {
+  constructor() {
+    super('unauthorized')
+    this.name = 'UnauthorizedError'
+  }
+}
 
 async function readConfigDashboardUrl(): Promise<string | null> {
   try {
@@ -16,35 +22,39 @@ async function readConfigDashboardUrl(): Promise<string | null> {
   }
 }
 
-async function fetchDashboard(url: string): Promise<CashDashboard> {
-  const bust = url.includes('?') ? `&t=${Date.now()}` : `?t=${Date.now()}`
-  const res = await fetch(`${url}${bust}`, { cache: 'no-store' })
-  if (!res.ok) {
-    throw new Error(`Failed to load cash dashboard (${res.status}) from ${url}`)
+export function normalize(data: CashDashboard): CashDashboard {
+  if (!data || !Array.isArray(data.categories) || !Array.isArray(data.jobs)) {
+    throw new Error('The money feed sent something unexpected. Try again in a minute.')
   }
-  return (await res.json()) as CashDashboard
-}
-
-function normalize(data: CashDashboard): CashDashboard {
-  if (!Array.isArray(data.categories) || !Array.isArray(data.jobs)) {
-    throw new Error('Cash dashboard file is missing categories or jobs')
-  }
-  // plannedIncome is optional (older feed/snapshot); drop it if malformed so the page still renders.
+  if (!Array.isArray(data.recentTransactions)) data.recentTransactions = []
+  // plannedIncome is optional; drop it if malformed so the page still renders.
   if (data.plannedIncome && !Array.isArray(data.plannedIncome.jobs)) {
     delete data.plannedIncome
   }
   return data
 }
 
-export async function loadCashDashboard(): Promise<CashDashboard> {
-  const liveUrl = await readConfigDashboardUrl()
-  if (liveUrl) {
-    try {
-      return normalize(await fetchDashboard(liveUrl))
-    } catch (err) {
-      console.warn('[gpcl] Live dashboard fetch failed; using local snapshot.', err)
-    }
+export async function loadCashDashboard(key: string): Promise<CashDashboard> {
+  if (!key) throw new UnauthorizedError()
+  const url = await readConfigDashboardUrl()
+  if (!url) throw new Error('The money feed is not set up yet.')
+  const sep = url.includes('?') ? '&' : '?'
+  let res: Response
+  try {
+    res = await fetch(`${url}${sep}key=${encodeURIComponent(key)}&t=${Date.now()}`, {
+      cache: 'no-store',
+    })
+  } catch {
+    throw new Error('Couldn’t reach the money feed. Check your connection and try again.')
   }
-  const localUrl = `${import.meta.env.BASE_URL}${LOCAL_DASHBOARD}`
-  return normalize(await fetchDashboard(localUrl))
+  if (!res.ok) throw new Error('The money feed is not available right now. Try again in a minute.')
+  let body: (Partial<CashDashboard> & { error?: string }) | null = null
+  try {
+    body = (await res.json()) as Partial<CashDashboard> & { error?: string }
+  } catch {
+    throw new Error('The money feed sent something unexpected. Try again in a minute.')
+  }
+  if (body?.error === 'unauthorized') throw new UnauthorizedError()
+  if (body?.error) throw new Error('The money feed is not available right now. Try again in a minute.')
+  return normalize(body as CashDashboard)
 }

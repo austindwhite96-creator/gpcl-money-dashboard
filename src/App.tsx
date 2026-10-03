@@ -3,66 +3,101 @@ import {
   ArrowDownRight,
   ArrowUpRight,
   Banknote,
+  Landmark,
   House,
   Receipt,
-  RefreshCw,
 } from 'lucide-react'
-import { loadCashDashboard } from './data/cashDashboard'
-import { formatMargin, formatPay } from './lib/money'
-import { formatSyncedAt, formatTxnDate } from './lib/dates'
+import { loadCashDashboard, UnauthorizedError } from './data/cashDashboard'
+import { captureKeyFromUrl, clearKey, extractKey, getStoredKey, saveKey } from './lib/accessKey'
+import { formatMargin, formatMoney } from './lib/money'
+import { dateSortKey, formatSyncedAt, formatTxnDate } from './lib/dates'
 import { PlannedIncome } from './components/PlannedIncome'
 import type { CashDashboard, CategorySpend } from './types'
 
+type Phase =
+  | { kind: 'loading' }
+  | { kind: 'needKey'; message?: string }
+  | { kind: 'error'; message: string }
+  | { kind: 'ready'; data: CashDashboard }
+
 export default function App() {
-  const [data, setData] = useState<CashDashboard | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [loadError, setLoadError] = useState<string | null>(null)
+  const [phase, setPhase] = useState<Phase>(() =>
+    getStoredKey() ? { kind: 'loading' } : { kind: 'needKey' },
+  )
+  const [attempt, setAttempt] = useState(0)
+  const retry = () => {
+    setPhase({ kind: 'loading' })
+    setAttempt((n) => n + 1)
+  }
+
+  // A personal link opened while the page is already open (#k=…) is saved and scrubbed too.
+  useEffect(() => {
+    const onHash = () => {
+      if (captureKeyFromUrl()) {
+        setPhase({ kind: 'loading' })
+        setAttempt((n) => n + 1)
+      }
+    }
+    window.addEventListener('hashchange', onHash)
+    return () => window.removeEventListener('hashchange', onHash)
+  }, [])
 
   useEffect(() => {
     let cancelled = false
-    loadCashDashboard()
+    const key = getStoredKey()
+    if (!key) return
+    loadCashDashboard(key)
       .then((dash) => {
-        if (cancelled) return
-        setData(dash)
-        setLoading(false)
+        if (!cancelled) setPhase({ kind: 'ready', data: dash })
       })
       .catch((err: unknown) => {
         if (cancelled) return
-        const message = err instanceof Error ? err.message : 'Failed to load cash dashboard'
-        setLoadError(message)
-        setData(null)
-        setLoading(false)
+        if (err instanceof UnauthorizedError) {
+          clearKey()
+          setPhase({ kind: 'needKey', message: 'That key did not work. Check it and try again.' })
+          return
+        }
+        const message = err instanceof Error ? err.message : 'Couldn’t load the money page.'
+        setPhase({ kind: 'error', message })
       })
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [attempt])
 
-  if (loading) {
+  if (phase.kind === 'loading') {
     return (
       <div className="flex min-h-dvh flex-col items-center justify-center bg-cream px-6 text-center">
         <p className="text-4xl">🎄</p>
         <p className="mt-4 text-xl font-bold text-gpcl-900">Loading…</p>
-        <p className="mt-2 text-sm text-gpcl-800/70">Fetching owner cash snapshot</p>
       </div>
     )
   }
 
-  if (loadError || !data) {
+  if (phase.kind === 'needKey') {
+    return (
+      <AccessPrompt
+        message={phase.message}
+        onSubmit={(raw) => {
+          const token = extractKey(raw)
+          if (!token) return 'That does not look like an access key.'
+          saveKey(token)
+          retry()
+          return null
+        }}
+      />
+    )
+  }
+
+  if (phase.kind === 'error') {
     return (
       <div className="flex min-h-dvh flex-col items-center justify-center bg-cream px-6 text-center">
         <p className="text-4xl">⚠️</p>
         <p className="mt-4 text-xl font-bold text-gpcl-900">Couldn’t load cash</p>
-        <p className="mt-2 max-w-sm text-sm text-gpcl-800/80">
-          {loadError ?? 'Cash dashboard file is missing or invalid.'}
-        </p>
-        <p className="mt-4 max-w-sm text-xs text-gpcl-800/60">
-          Expected <code className="rounded bg-gpcl-100 px-1">cash-dashboard.json</code>. Tell App
-          Developer “refresh the dashboard”.
-        </p>
+        <p className="mt-2 max-w-sm text-sm text-gpcl-800/80">{phase.message}</p>
         <button
           type="button"
-          onClick={() => window.location.reload()}
+          onClick={retry}
           className="mt-6 rounded-2xl bg-gpcl-700 px-5 py-3 text-sm font-bold text-white"
         >
           Try again
@@ -71,11 +106,62 @@ export default function App() {
     )
   }
 
-  return <Dashboard data={data} />
+  return <Dashboard data={phase.data} />
+}
+
+function AccessPrompt({
+  message,
+  onSubmit,
+}: {
+  message?: string
+  onSubmit: (raw: string) => string | null
+}) {
+  const [value, setValue] = useState('')
+  const [error, setError] = useState<string | null>(message ?? null)
+  return (
+    <div className="flex min-h-dvh flex-col items-center justify-center bg-cream px-6 text-center">
+      <p className="text-4xl">🔒</p>
+      <h1 className="mt-4 text-2xl font-bold text-gpcl-900">Enter access key</h1>
+      <p className="mt-2 max-w-sm text-sm text-gpcl-800/80">
+        This page is private. Paste your access key (or your personal link) to open it.
+      </p>
+      <form
+        className="mt-6 flex w-full max-w-sm flex-col gap-3"
+        onSubmit={(e) => {
+          e.preventDefault()
+          setError(onSubmit(value))
+        }}
+      >
+        <input
+          type="password"
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+          autoComplete="off"
+          autoCapitalize="off"
+          autoCorrect="off"
+          spellCheck={false}
+          aria-label="Access key"
+          placeholder="Access key"
+          className="w-full rounded-2xl border border-gpcl-200 bg-white px-4 py-3 text-base text-gpcl-950 outline-none focus:border-gpcl-600"
+        />
+        {error ? <p className="text-sm text-rose-800">{error}</p> : null}
+        <button
+          type="submit"
+          className="rounded-2xl bg-gpcl-700 px-5 py-3 text-sm font-bold text-white"
+        >
+          Open
+        </button>
+      </form>
+    </div>
+  )
 }
 
 function Dashboard({ data }: { data: CashDashboard }) {
   const categories = useMemo(() => sortCategories(data.categories), [data.categories])
+  const openJobs = useMemo(
+    () => [...data.jobs].sort((a, b) => dateSortKey(a.jobDate).localeCompare(dateSortKey(b.jobDate))),
+    [data.jobs],
+  )
   const maxCategory = Math.max(0, ...categories.map((c) => c.total))
   const profitNegative = data.netCashProfit < 0
   const profitPositive = data.netCashProfit > 0
@@ -112,7 +198,7 @@ function Dashboard({ data }: { data: CashDashboard }) {
             Net Cash Profit
           </p>
           <p className="mt-2 text-5xl font-bold tracking-tight">
-            {formatPay(data.netCashProfit)}
+            {formatMoney(data.netCashProfit)}
           </p>
           <p className="mt-3 text-sm text-white/80">
             Hard cash in minus hard cash out
@@ -124,15 +210,33 @@ function Dashboard({ data }: { data: CashDashboard }) {
           <MetricTile
             icon={<Banknote size={18} />}
             label="Hard Revenue"
-            value={formatPay(data.hardRevenue)}
+            value={formatMoney(data.hardRevenue)}
           />
           <MetricTile
             icon={<Receipt size={18} />}
             label="Hard Expenses"
-            value={formatPay(data.hardExpenses)}
+            value={formatMoney(data.hardExpenses)}
             emphasize
           />
         </div>
+
+        {data.salesTaxHeld != null ? (
+          <div className="rounded-3xl border border-gpcl-100 bg-white p-4 shadow-sm">
+            <div className="mb-2 flex items-center gap-1.5 text-gpcl-600">
+              <Landmark size={18} />
+              <span className="text-[11px] font-bold uppercase tracking-[0.12em]">
+                Held for the state
+              </span>
+            </div>
+            <p className="text-2xl font-bold tracking-tight text-gpcl-900">
+              {formatMoney(data.salesTaxHeld)}
+            </p>
+            <p className="mt-1 text-xs text-gpcl-800/70">
+              Sales tax collected from customers that we owe the state. It is not our money and not
+              counted in profit.
+            </p>
+          </div>
+        ) : null}
 
         <PlannedIncome data={data} />
 
@@ -154,7 +258,7 @@ function Dashboard({ data }: { data: CashDashboard }) {
                       {cat.name}
                     </p>
                     <p className={`text-sm font-bold tabular-nums ${active ? 'text-gpcl-800' : 'text-gpcl-700'}`}>
-                      {formatPay(cat.total)}
+                      {formatMoney(cat.total)}
                     </p>
                   </div>
                   <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-gpcl-100">
@@ -175,25 +279,40 @@ function Dashboard({ data }: { data: CashDashboard }) {
           </h2>
           <p className="mb-3 text-sm text-gpcl-800/70">Quoted vs collected</p>
           {data.jobs.length === 0 ? (
-            <p className="text-gpcl-800/70">No open jobs in this snapshot.</p>
+            <p className="text-gpcl-800/70">No open jobs right now.</p>
           ) : (
             <ul className="space-y-4">
-              {data.jobs.map((job) => {
+              {openJobs.map((job) => {
                 const collectedPct =
                   job.quotedRevenue > 0
                     ? Math.min(100, (job.revenueCollected / job.quotedRevenue) * 100)
                     : 0
                 return (
-                  <li key={job.quoteId} className="border-t border-gpcl-100 pt-4 first:border-t-0 first:pt-0">
-                    <p className="font-semibold text-gpcl-950">{job.customer}</p>
-                    <p className="text-sm text-gpcl-800/70">{job.address}</p>
+                  <li key={job.id} className="border-t border-gpcl-100 pt-4 first:border-t-0 first:pt-0">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="font-semibold text-gpcl-950">{job.name}</p>
+                        <p className="text-sm text-gpcl-800/70">
+                          {job.jobDate ? formatTxnDate(job.jobDate) : 'Date TBD'}
+                        </p>
+                      </div>
+                      <p
+                        className={`shrink-0 rounded-full px-2 py-0.5 text-[11px] font-bold ${
+                          job.status === 'Paid in full'
+                            ? 'bg-gpcl-100 text-gpcl-800'
+                            : 'bg-amber-100 text-amber-900'
+                        }`}
+                      >
+                        {job.status}
+                      </p>
+                    </div>
                     <div className="mt-3 grid grid-cols-2 gap-3">
                       <div>
                         <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-gpcl-600">
                           Quoted
                         </p>
                         <p className="text-lg font-bold text-gpcl-900">
-                          {formatPay(job.quotedRevenue)}
+                          {formatMoney(job.quotedRevenue)}
                         </p>
                       </div>
                       <div>
@@ -201,7 +320,7 @@ function Dashboard({ data }: { data: CashDashboard }) {
                           Collected
                         </p>
                         <p className="text-lg font-bold text-gpcl-900">
-                          {formatPay(job.revenueCollected)}
+                          {formatMoney(job.revenueCollected)}
                         </p>
                       </div>
                     </div>
@@ -211,12 +330,6 @@ function Dashboard({ data }: { data: CashDashboard }) {
                         style={{ width: `${collectedPct}%` }}
                       />
                     </div>
-                    {job.notes ? (
-                      <p className="mt-2 text-sm text-gpcl-800/75">{job.notes}</p>
-                    ) : null}
-                    <p className="mt-1 text-[11px] font-medium tracking-wide text-gpcl-800/50">
-                      {job.quoteId}
-                    </p>
                   </li>
                 )
               })}
@@ -251,7 +364,7 @@ function Dashboard({ data }: { data: CashDashboard }) {
                         }`}
                       >
                         {inflow ? <ArrowUpRight size={16} /> : <ArrowDownRight size={16} />}
-                        {formatPay(inflow ? txn.moneyIn : txn.moneyOut)}
+                        {formatMoney(inflow ? txn.moneyIn : txn.moneyOut)}
                       </p>
                     </div>
                   </li>
@@ -266,15 +379,7 @@ function Dashboard({ data }: { data: CashDashboard }) {
             <strong>Hard</strong> = cash actually in or out. Quoted is not revenue until collected. <strong>Planned</strong> = what we expect once booked jobs are done.
           </p>
           <p className="mt-2 text-sm text-gpcl-800/80">
-            Source: Cash Tracker
-            {data.syncedFrom ? ` (${data.syncedFrom})` : ''}.
-            Synced {formatSyncedAt(data.syncedAt)}.
-          </p>
-          <p className="mt-3 flex items-start gap-2 text-sm text-gpcl-800/80">
-            <RefreshCw size={16} className="mt-0.5 shrink-0 text-gpcl-600" />
-            <span>
-              To refresh this view, tell App Developer <strong>“refresh the dashboard”</strong>.
-            </span>
+            Source: Cash Tracker. Updated {formatSyncedAt(data.syncedAt)}.
           </p>
         </section>
       </main>

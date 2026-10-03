@@ -1,7 +1,18 @@
 import { TrendingUp } from 'lucide-react'
-import { formatPay, formatPayExact } from '../lib/money'
-import { formatTxnDate } from '../lib/dates'
-import { computePlanned, crewCost, gpclKeeps, ownerPay } from '../lib/planned'
+import { formatMargin, formatMoney } from '../lib/money'
+import { dateSortKey, formatTxnDate } from '../lib/dates'
+import {
+  balanceDue,
+  computePlanned,
+  crewCost,
+  gpclKeeps,
+  leadFee,
+  marginPct,
+  materialsCost,
+  materialsPending,
+  ownerPay,
+  taxStillDue,
+} from '../lib/planned'
 import type { CashDashboard } from '../types'
 
 function Pill({ kind }: { kind: 'actual' | 'planned' }) {
@@ -45,6 +56,22 @@ function Row({
   )
 }
 
+function formatMonth(ym: string): string {
+  const [y, m] = ym.split('-').map(Number)
+  if (!y || !m) return ym
+  return new Date(y, m - 1, 1).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
+}
+
+function notCounted(t: NonNullable<ReturnType<typeof computePlanned>>): string[] {
+  const out: string[] = []
+  if (t.jobsMissingMaterials > 0)
+    out.push(
+      `materials for ${t.jobsMissingMaterials} taxable install${t.jobsMissingMaterials === 1 ? '' : 's'}`,
+    )
+  if (!t.insuranceInTracker) out.push('insurance')
+  return out
+}
+
 export function PlannedIncome({ data }: { data: CashDashboard }) {
   const planned = data.plannedIncome
   // Older feed / snapshot without plannedIncome: show nothing, rest of the page is unaffected.
@@ -58,7 +85,9 @@ export function PlannedIncome({ data }: { data: CashDashboard }) {
       </section>
     ) : null
   }
-  const jobs = planned.jobs
+  const sortedJobs = [...planned.jobs].sort((a, b) =>
+    dateSortKey(a.installDate).localeCompare(dateSortKey(b.installDate)),
+  )
   const negative = totals.projectedBottomLine < 0
 
   return (
@@ -77,12 +106,12 @@ export function PlannedIncome({ data }: { data: CashDashboard }) {
         <p className="mb-1 flex items-center gap-2 text-xs font-bold uppercase tracking-[0.12em] text-gpcl-700">
           Where we are today <Pill kind="actual" />
         </p>
-        <Row label="Collected so far" value={formatPayExact(totals.collectedSoFar)} />
-        <Row label="Expenses so far" value={`−${formatPayExact(totals.expensesToDate)}`} />
+        <Row label="Collected so far" value={formatMoney(totals.collectedSoFar)} />
+        <Row label="Expenses so far" value={`−${formatMoney(totals.expensesToDate)}`} />
         <div className="mt-1 border-t border-gpcl-200 pt-1">
           <Row
             label="Net today"
-            value={formatPayExact(totals.netToday)}
+            value={formatMoney(totals.netToday)}
             bold
             negative={totals.netToday < 0}
           />
@@ -102,10 +131,11 @@ export function PlannedIncome({ data }: { data: CashDashboard }) {
           </span>
         </p>
         <p className="mt-1 text-4xl font-bold tracking-tight">
-          {formatPayExact(totals.projectedBottomLine)}
+          {formatMoney(totals.projectedBottomLine)}
         </p>
         <p className="mt-1 text-sm text-white/80">
-          After all {totals.jobCount} booked jobs are collected and crew is paid.
+          After all {totals.jobCount} booked jobs are collected and paid for: crew, materials and
+          monthly bills included.
         </p>
       </div>
 
@@ -113,38 +143,56 @@ export function PlannedIncome({ data }: { data: CashDashboard }) {
         <p className="mb-1 flex items-center gap-2 text-xs font-bold uppercase tracking-[0.12em] text-amber-900">
           How we get there <Pill kind="planned" />
         </p>
-        <Row label="Collected so far (actual)" value={formatPayExact(totals.collectedSoFar)} />
-        <Row label="+ Still expected from jobs" value={formatPayExact(totals.stillExpected)} />
-        <Row label="= Planned total revenue" value={formatPayExact(totals.plannedRevenue)} bold />
+        <Row label="Collected so far (actual)" value={formatMoney(totals.collectedSoFar)} />
+        <Row label="+ Still expected from jobs" value={formatMoney(totals.stillExpected)} />
+        <Row label="= Planned total revenue" value={formatMoney(totals.plannedRevenue)} bold />
         <Row
           label="− Planned crew pay"
-          value={`−${formatPayExact(totals.crewStillToPay)}`}
+          value={`−${formatMoney(totals.crewStillToPay)}`}
         />
         <p className="-mt-0.5 pb-1 text-xs italic text-gpcl-800/60">
           Austin&apos;s pay counted as profit
-          {totals.plannedToAustin > 0 ? ` (${formatPayExact(totals.plannedToAustin)} not subtracted)` : ''}
+          {totals.plannedToAustin > 0 ? ` (${formatMoney(totals.plannedToAustin)} not subtracted)` : ''}
         </p>
         {totals.crewPaidSoFar > 0 ? (
           <Row
             label="(crew already paid is in expenses)"
-            value={formatPayExact(totals.crewPaidSoFar)}
+            value={formatMoney(totals.crewPaidSoFar)}
             muted
           />
         ) : null}
-        <Row label="− Expenses to date (actual)" value={`−${formatPayExact(totals.expensesToDate)}`} />
+        <Row
+          label="− Planned materials still to buy"
+          value={`−${formatMoney(totals.materialsStillToBuy)}`}
+        />
+        <Row
+          label={`− Monthly bills still to come${totals.recurringThroughMonth ? ` (through ${formatMonth(totals.recurringThroughMonth)})` : ''}`}
+          value={`−${formatMoney(totals.recurringAhead)}`}
+        />
+        {totals.recurringItems.map((r) => (
+          <p key={r.label + r.monthly} className="-mt-0.5 pb-1 text-xs italic text-gpcl-800/60">
+            {r.label} {formatMoney(r.monthly)}/mo × {r.months} month{r.months === 1 ? '' : 's'}
+          </p>
+        ))}
+        <Row label="− Expenses to date (actual)" value={`−${formatMoney(totals.expensesToDate)}`} />
         <div className="mt-1 border-t border-amber-200 pt-1">
           <Row
             label="= Projected bottom line"
-            value={formatPayExact(totals.projectedBottomLine)}
+            value={formatMoney(totals.projectedBottomLine)}
             bold
             negative={negative}
           />
         </div>
         <p className="mt-2 text-xs leading-relaxed text-gpcl-800/75">
-          Revenue is before sales tax. Sales tax
-          {totals.salesTaxExcluded > 0 ? ` (about ${formatPayExact(totals.salesTaxExcluded)} expected)` : ''} is
-          owed to the state, so it is <strong>not</strong> counted as income. No new expenses beyond
-          what is already logged are assumed.
+          Revenue is before sales tax. Sales tax is owed to the state, so it is <strong>not</strong>{' '}
+          counted as income: {formatMoney(totals.salesTaxStillToCollect)} still to collect (of{' '}
+          {formatMoney(totals.salesTaxTotalExpected)} total expected on these jobs).
+        </p>
+        <p className="mt-2 text-xs leading-relaxed text-gpcl-800/75">
+          <strong>Counted:</strong> crew pay, planned materials and monthly bills that are written in
+          the Cash Tracker. <strong>Not counted yet (not in the tracker):</strong>{' '}
+          {notCounted(totals).join('; ')}
+          {notCounted(totals).length === 0 ? 'nothing known.' : '.'}
         </p>
       </div>
 
@@ -154,31 +202,30 @@ export function PlannedIncome({ data }: { data: CashDashboard }) {
           Booked jobs <Pill kind="planned" />
         </p>
         <ul className="space-y-3">
-          {jobs.map((job) => {
+          {sortedJobs.map((job) => {
             const keeps = gpclKeeps(job)
-            const done = job.stillExpected <= 0 && job.quotedPreTax > 0
+            const margin = marginPct(job)
+            const mats = materialsCost(job)
+            const fee = leadFee(job)
+            const due = balanceDue(job)
+            const taxDue = taxStillDue(job)
             return (
-              <li
-                key={`${job.customer}-${job.address}`}
-                className="rounded-2xl border border-gpcl-100 p-3"
-              >
+              <li key={job.id} className="rounded-2xl border border-gpcl-100 p-3">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <p className="font-semibold text-gpcl-950">{job.customer}</p>
+                    <p className="font-semibold text-gpcl-950">{job.name}</p>
                     <p className="text-xs text-gpcl-800/60">
                       {job.installDate ? `Install ${formatTxnDate(job.installDate)}` : 'Install date TBD'}
                     </p>
                   </div>
                   <p
                     className={`shrink-0 rounded-full px-2 py-0.5 text-[11px] font-bold ${
-                      done ? 'bg-gpcl-100 text-gpcl-800' : 'bg-amber-100 text-amber-900'
+                      job.status === 'Paid in full'
+                        ? 'bg-gpcl-100 text-gpcl-800'
+                        : 'bg-amber-100 text-amber-900'
                     }`}
                   >
-                    {done
-                      ? 'Collected'
-                      : job.collected > 0
-                        ? `Collected ${formatPay(job.collected)}`
-                        : 'Not collected yet'}
+                    {job.status}
                   </p>
                 </div>
                 <div className="mt-2 grid grid-cols-3 gap-2 text-center">
@@ -187,7 +234,7 @@ export function PlannedIncome({ data }: { data: CashDashboard }) {
                       Quoted
                     </p>
                     <p className="text-base font-bold tabular-nums text-gpcl-900">
-                      {formatPay(job.quotedPreTax)}
+                      {formatMoney(job.quotedPreTax)}
                     </p>
                   </div>
                   <div>
@@ -195,7 +242,7 @@ export function PlannedIncome({ data }: { data: CashDashboard }) {
                       Crew pay
                     </p>
                     <p className="text-base font-bold tabular-nums text-gpcl-900">
-                      {crewCost(job) == null ? '—' : formatPay(crewCost(job) as number)}
+                      {crewCost(job) == null ? '—' : formatMoney(crewCost(job) as number)}
                     </p>
                   </div>
                   <div>
@@ -203,23 +250,36 @@ export function PlannedIncome({ data }: { data: CashDashboard }) {
                       GPCL keeps
                     </p>
                     <p className="text-base font-bold tabular-nums text-gpcl-900">
-                      {keeps == null ? '—' : formatPay(keeps)}
+                      {keeps == null ? '—' : formatMoney(keeps)}
                     </p>
-                    {ownerPay(job) > 0 ? (
-                      <p className="text-[10px] text-gpcl-800/60">incl. Austin {formatPay(ownerPay(job))}</p>
+                    {margin != null ? (
+                      <p className="text-[10px] text-gpcl-800/60">{formatMargin(margin)} margin</p>
                     ) : null}
                   </div>
                 </div>
                 <p className="mt-2 text-xs text-gpcl-800/70">
-                  Still expected {formatPayExact(job.stillExpected)}
-                  {job.deposit > 0 ? ` · deposit ${formatPay(job.deposit)}` : ' · no deposit'}
-                  {job.salesTaxExpected > 0
-                    ? ` · + ${formatPayExact(job.salesTaxExpected)} sales tax (owed to state, not income)`
-                    : ''}
-                  {job.jobCosts > 0 ? ` · ${formatPayExact(job.jobCosts)} job cost already in expenses` : ''}
+                  Keeps = quoted − crew pay{mats > 0 ? ` − materials ${formatMoney(mats)}` : ''}
+                  {fee > 0 ? ` − lead fee ${formatMoney(fee)}` : ''}
+                  {ownerPay(job) > 0 ? ` (Austin ${formatMoney(ownerPay(job))} stays in profit)` : ''}
                 </p>
-                {job.flags.length > 0 ? (
+                <p className="mt-1 text-xs text-gpcl-800/70">
+                  {due > 0 ? (
+                    <>
+                      <strong>Balance due {formatMoney(due)}</strong>
+                      {taxDue > 0 ? ` (includes ${formatMoney(taxDue)} sales tax)` : ''}
+                    </>
+                  ) : (
+                    'Nothing left to collect'
+                  )}
+                  {job.deposit > 0 ? ` · deposit ${formatMoney(job.deposit)}` : ''}
+                </p>
+                {materialsPending(job) || job.flags.length > 0 ? (
                   <div className="mt-2 flex flex-wrap gap-1.5">
+                    {materialsPending(job) ? (
+                      <span className="rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-semibold text-amber-900 ring-1 ring-amber-200">
+                        ⚠ Materials not in the tracker yet - keeps may be too high
+                      </span>
+                    ) : null}
                     {job.flags.map((f) => (
                       <span
                         key={f}
@@ -240,8 +300,8 @@ export function PlannedIncome({ data }: { data: CashDashboard }) {
           </p>
         ) : null}
         <p className="mt-2 text-xs text-gpcl-800/60">
-          Planned = quotes and crew pay policy, not cash. “GPCL keeps” = quoted − crew pay, before
-          overhead. Austin&apos;s pay is not a cost: it stays in GPCL keeps / profit.
+          Planned = quotes and crew pay policy, not cash. “GPCL keeps” = quoted − crew pay − materials −
+          lead fee, before overhead. Austin&apos;s pay is not a cost: it stays in GPCL keeps / profit.
         </p>
       </div>
     </section>
