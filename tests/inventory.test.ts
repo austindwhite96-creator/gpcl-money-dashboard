@@ -103,6 +103,18 @@ test('photo mapping covers on-hand + pending product names', () => {
     ['500\' C9 magnetic cord SPT-1 12" spacing', 'magnetic_cord.png'],
     ['Minleon Clip V2+ 100PK', 'minleon_clip_v2.png'],
     ['C9 bulbs — red', 'c9_red.png'],
+    ['C9 bulbs — green', 'c9_green.png'],
+    ['C9 bulbs — pink', 'c9_pink.png'],
+    ['C9 bulbs — yellow', 'c9_yellow.png'],
+    ['C9 bulbs — orange', 'c9_orange.png'],
+    ['C9 bulbs — multi', 'c9_multi.png'],
+    ['C9 bulbs — green (Transparent Faceted)', 'c9_green.png'],
+    ['C9 bulbs — pink (Transparent Faceted)', 'c9_pink.png'],
+    ['C9 bulbs — yellow (Transparent Faceted)', 'c9_yellow.png'],
+    ['C9 bulbs — orange (Transparent Faceted)', 'c9_orange.png'],
+    ['C9 bulbs — multi (Transparent Faceted)', 'c9_multi.png'],
+    ['LED C9 Transparent Faceted Polycarbonate 25PK - Green', 'c9_green.png'],
+    ['LED C9 faceted pink 25pk', 'c9_pink.png'],
     ['Brand new mystery part', 'placeholder.png'],
   ]
   for (const [name, file] of cases) {
