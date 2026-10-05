@@ -129,8 +129,7 @@ export function Inventory({ data }: { data: InventoryFeed | undefined }) {
     <div className="space-y-6">
       {emptyFeed ? (
         <p className="rounded-3xl border border-gpcl-100 bg-white p-5 text-sm text-gpcl-800/70 shadow-sm">
-          Inventory is not in the live feed yet. Open with <code className="font-semibold">?preview=1</code>{' '}
-          for a local snapshot, or wait for the feed redeploy.
+          Inventory is not in the live feed yet. Wait for the Cash Tracker feed redeploy.
         </p>
       ) : null}
 

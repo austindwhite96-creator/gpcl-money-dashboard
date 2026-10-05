@@ -9,14 +9,6 @@ export class UnauthorizedError extends Error {
   }
 }
 
-function wantsPreview(): boolean {
-  try {
-    return new URLSearchParams(window.location.search).get('preview') === '1'
-  } catch {
-    return false
-  }
-}
-
 async function readConfigDashboardUrl(): Promise<string | null> {
   try {
     const base = import.meta.env.BASE_URL
@@ -28,18 +20,6 @@ async function readConfigDashboardUrl(): Promise<string | null> {
     return url
   } catch {
     return null
-  }
-}
-
-async function loadInventoryPreview(): Promise<CashDashboard['inventory'] | undefined> {
-  try {
-    const base = import.meta.env.BASE_URL
-    const res = await fetch(`${base}inventory-preview.json?t=${Date.now()}`, { cache: 'no-store' })
-    if (!res.ok) return undefined
-    const body = (await res.json()) as { inventory?: unknown }
-    return normalizeInventory(body.inventory ?? body)
-  } catch {
-    return undefined
   }
 }
 
@@ -62,7 +42,6 @@ export function normalize(data: CashDashboard): CashDashboard {
 
 export async function loadCashDashboard(key: string): Promise<CashDashboard> {
   if (!key) throw new UnauthorizedError()
-  const preview = wantsPreview()
   const url = await readConfigDashboardUrl()
 
   let dash: CashDashboard | null = null
@@ -96,31 +75,6 @@ export async function loadCashDashboard(key: string): Promise<CashDashboard> {
     }
   } else {
     feedError = new Error('The money feed is not set up yet.')
-  }
-
-  // Preview path: attach local inventory snapshot when asked, or when feed has no inventory / failed.
-  if (preview || !dash?.inventory) {
-    const inv = await loadInventoryPreview()
-    if (inv) {
-      if (dash) {
-        dash.inventory = inv
-      } else if (preview) {
-        // Minimal stub so Inventory screen can be previewed even if feed is down.
-        dash = normalize({
-          syncedFrom: 'inventory preview',
-          syncedAt: new Date().toISOString(),
-          hardRevenue: 0,
-          hardExpenses: 0,
-          netCashProfit: 0,
-          cashMargin: null,
-          receiptsNeeded: 0,
-          categories: [],
-          jobs: [],
-          recentTransactions: [],
-          inventory: inv,
-        })
-      }
-    }
   }
 
   if (!dash) throw feedError ?? new Error('The money feed is not available right now. Try again in a minute.')
