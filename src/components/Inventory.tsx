@@ -4,8 +4,10 @@ import { formatMoney } from '../lib/money'
 import {
   DEFAULT_LOW_STOCK_THRESHOLD,
   inventoryPhotoUrl,
+  itemLineValue,
   stockLabel,
   stockLevel,
+  sumInventoryValue,
 } from '../lib/inventory'
 import type { InventoryFeed, InventoryItem, StockLevel } from '../types'
 
@@ -36,7 +38,10 @@ function ItemCard({
   const showStockBadge = !pending
   const costLabel =
     item.unitCost == null ? 'Unit cost TBD' : `${formatMoney(item.unitCost)} / ${item.unit || 'ea'}`
-  const totalLabel = item.totalValue == null ? '—' : formatMoney(item.totalValue)
+  const lineValue = itemLineValue(item)
+  const hasValue =
+    item.totalValue != null || (item.unitCost != null && Number.isFinite(item.qty))
+  const totalLabel = hasValue ? formatMoney(lineValue) : '—'
 
   return (
     <li className="overflow-hidden rounded-3xl border border-gpcl-100 bg-white shadow-sm">
@@ -124,6 +129,9 @@ export function Inventory({ data }: { data: InventoryFeed | undefined }) {
   const onHand = data?.onHand ?? []
   const pending = data?.pending ?? []
   const emptyFeed = !data
+  const onHandValue = sumInventoryValue(onHand)
+  const pendingValue = sumInventoryValue(pending)
+  const showTotals = !emptyFeed
 
   return (
     <div className="space-y-6">
@@ -131,6 +139,43 @@ export function Inventory({ data }: { data: InventoryFeed | undefined }) {
         <p className="rounded-3xl border border-gpcl-100 bg-white p-5 text-sm text-gpcl-800/70 shadow-sm">
           Inventory is not in the live feed yet. Wait for the Cash Tracker feed redeploy.
         </p>
+      ) : null}
+
+      {showTotals ? (
+        <section className="space-y-3">
+          <div className="rounded-3xl bg-gradient-to-br from-gpcl-600 to-gpcl-900 p-5 text-white shadow-lg">
+            <p className="text-sm font-bold uppercase tracking-[0.14em] text-white/75">
+              On-hand value
+            </p>
+            <p className="mt-2 text-4xl font-bold tracking-tight tabular-nums sm:text-5xl">
+              {formatMoney(onHandValue)}
+            </p>
+            <p className="mt-3 text-sm text-white/80">
+              What stock on the shelf is worth right now
+              {onHand.length > 0
+                ? ` · ${onHand.length} item${onHand.length === 1 ? '' : 's'}`
+                : ''}
+            </p>
+          </div>
+
+          {pending.length > 0 ? (
+            <div className="rounded-3xl border border-amber-200 bg-amber-50 p-4 shadow-sm">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-amber-900/80">
+                    Pending cart — not purchased yet
+                  </p>
+                  <p className="mt-1 text-sm text-amber-900/70">
+                    Not counted in on-hand value
+                  </p>
+                </div>
+                <p className="shrink-0 text-xl font-bold tabular-nums text-amber-950">
+                  {formatMoney(pendingValue)}
+                </p>
+              </div>
+            </div>
+          ) : null}
+        </section>
       ) : null}
 
       <Section

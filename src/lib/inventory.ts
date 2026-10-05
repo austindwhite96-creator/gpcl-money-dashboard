@@ -166,3 +166,21 @@ function normalizeItem(row: unknown): InventoryItem {
     status: r.status === 'pending' ? 'pending' : undefined,
   }
 }
+
+/** Line value for totals: prefer totalValue; else qty × unitCost; else 0. */
+export function itemLineValue(item: Pick<InventoryItem, 'qty' | 'unitCost' | 'totalValue'>): number {
+  if (item.totalValue != null && Number.isFinite(item.totalValue)) return item.totalValue
+  if (item.unitCost != null && Number.isFinite(item.unitCost) && Number.isFinite(item.qty)) {
+    return item.qty * item.unitCost
+  }
+  return 0
+}
+
+/** Sum of itemLineValue across a list (on-hand or pending, never mixed by callers). */
+export function sumInventoryValue(
+  items: Array<Pick<InventoryItem, 'qty' | 'unitCost' | 'totalValue'>>,
+): number {
+  let total = 0
+  for (const item of items) total += itemLineValue(item)
+  return total
+}

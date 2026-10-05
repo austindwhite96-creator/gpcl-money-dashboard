@@ -8,9 +8,11 @@ import {
 } from '../src/lib/inventoryParse.ts'
 import {
   inventoryPhotoFile,
+  itemLineValue,
   normalizeInventory,
   stockLevel,
   slugifyItemName,
+  sumInventoryValue,
 } from '../src/lib/inventory.ts'
 
 /** Snapshot of the Cash Tracker Inventory tab (2026-10-05). */
@@ -135,4 +137,25 @@ test('normalizeInventory tolerates missing arrays and strips em-dash', () => {
   assert.equal(inv!.onHand[0].name, 'Timer')
   assert.equal(inv!.onHand[0].unitCost, null)
   assert.equal(slugifyItemName('C9 bulbs — blue'), 'c9_bulbs_blue')
+})
+
+test('itemLineValue prefers totalValue; falls back to qty × unitCost', () => {
+  assert.equal(itemLineValue({ qty: 10, unitCost: 2, totalValue: 25 }), 25)
+  assert.equal(itemLineValue({ qty: 10, unitCost: 2, totalValue: null }), 20)
+  assert.equal(itemLineValue({ qty: 10, unitCost: null, totalValue: null }), 0)
+  assert.equal(itemLineValue({ qty: 0, unitCost: 5, totalValue: null }), 0)
+})
+
+test('sumInventoryValue sums on-hand separately from pending', () => {
+  const onHand = [
+    { qty: 270, unitCost: 0.25, totalValue: 67.5 },
+    { qty: 10, unitCost: 2, totalValue: null },
+  ]
+  const pending = [
+    { qty: 1, unitCost: 15.25, totalValue: 15.25 },
+    { qty: 2, unitCost: 10, totalValue: null },
+  ]
+  assert.equal(sumInventoryValue(onHand), 87.5)
+  assert.equal(sumInventoryValue(pending), 35.25)
+  assert.notEqual(sumInventoryValue(onHand), sumInventoryValue(pending))
 })
