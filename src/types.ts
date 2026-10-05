@@ -69,6 +69,32 @@ export interface RecurringCost {
   kind: 'insurance' | 'other'
 }
 
+export type StockLevel = 'out' | 'low' | 'ok'
+
+/** One inventory line from the Cash Tracker Inventory tab (on-hand or pending). */
+export interface InventoryItem {
+  id: string
+  name: string
+  unit: string
+  qty: number
+  /** null when unit cost is blank / TBD on the sheet. */
+  unitCost: number | null
+  /** null when total value is blank. */
+  totalValue: number | null
+  lastUpdated: string
+  notes: string
+  /** Slug the front-end maps to a local static photo. Never binary. */
+  photoKey: string
+  status?: 'pending'
+}
+
+export interface InventoryFeed {
+  onHand: InventoryItem[]
+  pending: InventoryItem[]
+  /** qty > 0 && qty <= threshold => Low; qty === 0 => Out. Default 10. */
+  lowStockThreshold?: number
+}
+
 export interface CashDashboard {
   syncedFrom: string
   syncedAt: string
@@ -84,4 +110,5 @@ export interface CashDashboard {
   recentTransactions: CashTransaction[]
   recurring?: RecurringCost[]
   plannedIncome?: PlannedIncomeFeed
+  inventory?: InventoryFeed
 }

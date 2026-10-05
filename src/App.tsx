@@ -5,6 +5,7 @@ import {
   Banknote,
   Landmark,
   House,
+  Package,
   Receipt,
 } from 'lucide-react'
 import { loadCashDashboard, UnauthorizedError } from './data/cashDashboard'
@@ -12,6 +13,7 @@ import { captureKeyFromUrl, clearKey, extractKey, getStoredKey, saveKey } from '
 import { formatMargin, formatMoney } from './lib/money'
 import { dateSortKey, formatSyncedAt, formatTxnDate } from './lib/dates'
 import { PlannedIncome } from './components/PlannedIncome'
+import { Inventory } from './components/Inventory'
 import type { CashDashboard, CategorySpend } from './types'
 
 type Phase =
@@ -157,6 +159,7 @@ function AccessPrompt({
 }
 
 function Dashboard({ data }: { data: CashDashboard }) {
+  const [screen, setScreen] = useState<'money' | 'inventory'>('money')
   const categories = useMemo(() => sortCategories(data.categories), [data.categories])
   const openJobs = useMemo(
     () => [...data.jobs].sort((a, b) => dateSortKey(a.jobDate).localeCompare(dateSortKey(b.jobDate))),
@@ -168,7 +171,7 @@ function Dashboard({ data }: { data: CashDashboard }) {
 
   return (
     <div className="flex min-h-dvh flex-col bg-cream">
-      <header className="safe-top bg-gpcl-700 px-5 pb-5 pt-4 text-white">
+      <header className="safe-top bg-gpcl-700 px-5 pb-4 pt-4 text-white">
         <div className="mb-3 flex items-center gap-2.5">
           <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/15 text-lg">
             🎄
@@ -180,10 +183,39 @@ function Dashboard({ data }: { data: CashDashboard }) {
             <p className="text-sm font-medium text-white/90">Owner</p>
           </div>
         </div>
-        <h1 className="text-3xl font-bold tracking-tight">2026 season cash</h1>
-        <p className="mt-1 text-base text-gpcl-100/90">Where are we financially?</p>
+        <h1 className="text-3xl font-bold tracking-tight">
+          {screen === 'money' ? '2026 season cash' : 'Inventory'}
+        </h1>
+        <p className="mt-1 text-base text-gpcl-100/90">
+          {screen === 'money' ? 'Where are we financially?' : 'On-hand stock and pending orders'}
+        </p>
+        <div className="mt-4 grid grid-cols-2 gap-2 rounded-2xl bg-black/15 p-1">
+          <button
+            type="button"
+            onClick={() => setScreen('money')}
+            className={`rounded-xl px-3 py-2 text-sm font-bold transition ${
+              screen === 'money' ? 'bg-white text-gpcl-800 shadow' : 'text-white/85'
+            }`}
+          >
+            Money
+          </button>
+          <button
+            type="button"
+            onClick={() => setScreen('inventory')}
+            className={`inline-flex items-center justify-center gap-1.5 rounded-xl px-3 py-2 text-sm font-bold transition ${
+              screen === 'inventory' ? 'bg-white text-gpcl-800 shadow' : 'text-white/85'
+            }`}
+          >
+            <Package size={14} /> Inventory
+          </button>
+        </div>
       </header>
 
+      {screen === 'inventory' ? (
+        <main className="flex-1 px-4 py-4">
+          <Inventory data={data.inventory} />
+        </main>
+      ) : (
       <main className="flex-1 space-y-4 px-4 py-4">
         <section
           className={`rounded-3xl bg-gradient-to-br p-5 text-white shadow-lg ${
@@ -383,6 +415,7 @@ function Dashboard({ data }: { data: CashDashboard }) {
           </p>
         </section>
       </main>
+      )}
 
       <footer className="safe-bottom px-6 pb-8 pt-2">
         <div className="flex items-center gap-3">

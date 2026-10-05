@@ -1,10 +1,19 @@
 import type { CashDashboard } from '../types'
+import { normalizeInventory } from '../lib/inventory'
 
 /** The feed said no (missing / wrong key). */
 export class UnauthorizedError extends Error {
   constructor() {
     super('unauthorized')
     this.name = 'UnauthorizedError'
+  }
+}
+
+function wantsPreview(): boolean {
+  try {
+    return new URLSearchParams(window.location.search).get('preview') === '1'
+  } catch {
+    return false
   }
 }
 
@@ -22,6 +31,18 @@ async function readConfigDashboardUrl(): Promise<string | null> {
   }
 }
 
+async function loadInventoryPreview(): Promise<CashDashboard['inventory'] | undefined> {
+  try {
+    const base = import.meta.env.BASE_URL
+    const res = await fetch(`${base}inventory-preview.json?t=${Date.now()}`, { cache: 'no-store' })
+    if (!res.ok) return undefined
+    const body = (await res.json()) as { inventory?: unknown }
+    return normalizeInventory(body.inventory ?? body)
+  } catch {
+    return undefined
+  }
+}
+
 export function normalize(data: CashDashboard): CashDashboard {
   if (!data || !Array.isArray(data.categories) || !Array.isArray(data.jobs)) {
     throw new Error('The money feed sent something unexpected. Try again in a minute.')
@@ -31,30 +52,77 @@ export function normalize(data: CashDashboard): CashDashboard {
   if (data.plannedIncome && !Array.isArray(data.plannedIncome.jobs)) {
     delete data.plannedIncome
   }
+  if (data.inventory) {
+    const inv = normalizeInventory(data.inventory)
+    if (inv) data.inventory = inv
+    else delete data.inventory
+  }
   return data
 }
 
 export async function loadCashDashboard(key: string): Promise<CashDashboard> {
   if (!key) throw new UnauthorizedError()
+  const preview = wantsPreview()
   const url = await readConfigDashboardUrl()
-  if (!url) throw new Error('The money feed is not set up yet.')
-  const sep = url.includes('?') ? '&' : '?'
-  let res: Response
-  try {
-    res = await fetch(`${url}${sep}key=${encodeURIComponent(key)}&t=${Date.now()}`, {
-      cache: 'no-store',
-    })
-  } catch {
-    throw new Error('Couldn’t reach the money feed. Check your connection and try again.')
+
+  let dash: CashDashboard | null = null
+  let feedError: Error | null = null
+
+  if (url) {
+    const sep = url.includes('?') ? '&' : '?'
+    try {
+      const res = await fetch(`${url}${sep}key=${encodeURIComponent(key)}&t=${Date.now()}`, {
+        cache: 'no-store',
+      })
+      if (!res.ok) {
+        feedError = new Error('The money feed is not available right now. Try again in a minute.')
+      } else {
+        let body: (Partial<CashDashboard> & { error?: string }) | null = null
+        try {
+          body = (await res.json()) as Partial<CashDashboard> & { error?: string }
+        } catch {
+          feedError = new Error('The money feed sent something unexpected. Try again in a minute.')
+        }
+        if (body?.error === 'unauthorized') throw new UnauthorizedError()
+        if (body?.error) {
+          feedError = new Error('The money feed is not available right now. Try again in a minute.')
+        } else if (body) {
+          dash = normalize(body as CashDashboard)
+        }
+      }
+    } catch (err) {
+      if (err instanceof UnauthorizedError) throw err
+      feedError = new Error('Couldn’t reach the money feed. Check your connection and try again.')
+    }
+  } else {
+    feedError = new Error('The money feed is not set up yet.')
   }
-  if (!res.ok) throw new Error('The money feed is not available right now. Try again in a minute.')
-  let body: (Partial<CashDashboard> & { error?: string }) | null = null
-  try {
-    body = (await res.json()) as Partial<CashDashboard> & { error?: string }
-  } catch {
-    throw new Error('The money feed sent something unexpected. Try again in a minute.')
+
+  // Preview path: attach local inventory snapshot when asked, or when feed has no inventory / failed.
+  if (preview || !dash?.inventory) {
+    const inv = await loadInventoryPreview()
+    if (inv) {
+      if (dash) {
+        dash.inventory = inv
+      } else if (preview) {
+        // Minimal stub so Inventory screen can be previewed even if feed is down.
+        dash = normalize({
+          syncedFrom: 'inventory preview',
+          syncedAt: new Date().toISOString(),
+          hardRevenue: 0,
+          hardExpenses: 0,
+          netCashProfit: 0,
+          cashMargin: null,
+          receiptsNeeded: 0,
+          categories: [],
+          jobs: [],
+          recentTransactions: [],
+          inventory: inv,
+        })
+      }
+    }
   }
-  if (body?.error === 'unauthorized') throw new UnauthorizedError()
-  if (body?.error) throw new Error('The money feed is not available right now. Try again in a minute.')
-  return normalize(body as CashDashboard)
+
+  if (!dash) throw feedError ?? new Error('The money feed is not available right now. Try again in a minute.')
+  return dash
 }
