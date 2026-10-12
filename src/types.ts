@@ -101,6 +101,8 @@ export interface CashDashboard {
   hardRevenue: number
   hardExpenses: number
   netCashProfit: number
+  /** Sheet 'Season-End Profit (no new jobs)': Net Cash Profit + what booked jobs still bring in. Null on older feeds. */
+  seasonEndProfit?: number | null
   cashMargin: number | null
   receiptsNeeded: number
   /** Sales tax collected and not yet paid to the state. */

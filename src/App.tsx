@@ -166,8 +166,10 @@ function Dashboard({ data }: { data: CashDashboard }) {
     [data.jobs],
   )
   const maxCategory = Math.max(0, ...categories.map((c) => c.total))
-  const profitNegative = data.netCashProfit < 0
-  const profitPositive = data.netCashProfit > 0
+  const hasSeasonEnd = typeof data.seasonEndProfit === 'number' && Number.isFinite(data.seasonEndProfit)
+  const headline = hasSeasonEnd ? (data.seasonEndProfit as number) : data.netCashProfit
+  const profitNegative = headline < 0
+  const profitPositive = headline > 0
 
   return (
     <div className="flex min-h-dvh flex-col bg-cream">
@@ -227,15 +229,30 @@ function Dashboard({ data }: { data: CashDashboard }) {
           }`}
         >
           <p className="text-sm font-bold uppercase tracking-[0.14em] text-white/75">
-            Net Cash Profit
+            {hasSeasonEnd ? 'Season-End Profit' : 'Net Cash Profit'}
           </p>
           <p className="mt-2 text-5xl font-bold tracking-tight">
-            {formatMoney(data.netCashProfit)}
+            {formatMoney(headline)}
           </p>
-          <p className="mt-3 text-sm text-white/80">
-            Hard cash in minus hard cash out
-            {data.cashMargin != null ? ` · margin ${formatMargin(data.cashMargin)}` : ''}
-          </p>
+          {hasSeasonEnd ? (
+            <>
+              <p className="mt-3 text-sm text-white/80">
+                If booked jobs finish as planned, no new jobs
+              </p>
+              <div className="mt-3 flex items-baseline justify-between border-t border-white/20 pt-3 text-sm">
+                <span className="font-semibold text-white/80">Net Cash Profit today</span>
+                <span className="font-bold text-white">
+                  {formatMoney(data.netCashProfit)}
+                  {data.cashMargin != null ? ` · ${formatMargin(data.cashMargin)}` : ''}
+                </span>
+              </div>
+            </>
+          ) : (
+            <p className="mt-3 text-sm text-white/80">
+              Hard cash in minus hard cash out
+              {data.cashMargin != null ? ` · margin ${formatMargin(data.cashMargin)}` : ''}
+            </p>
+          )}
         </section>
 
         <div className="grid grid-cols-2 gap-3">
