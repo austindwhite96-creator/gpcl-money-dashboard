@@ -52,6 +52,20 @@ export interface PlannedJob {
   /** The part of crewPay that is Austin's own pay (counts as profit). */
   ownerPay: number
   flags: string[]
+  /** Per-job profit exactly as the Cash Tracker Jobs tab has it (display only; null = columns missing). */
+  sheet?: SheetKeeps | null
+}
+
+/** Cash Tracker Jobs columns, by header label. null = blank / column missing. */
+export interface SheetKeeps {
+  quoted: number | null
+  crew: number | null
+  leadFee: number | null
+  materials: number | null
+  otherDirect: number | null
+  keeps: number | null
+  /** 'Keeps basis / flags', scrubbed on the server. */
+  basis?: string
 }
 
 export interface PlannedIncomeFeed {

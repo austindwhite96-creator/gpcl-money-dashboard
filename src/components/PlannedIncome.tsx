@@ -1,18 +1,11 @@
 import type { ReactNode } from 'react'
 import { TrendingUp } from 'lucide-react'
-import { formatMargin, formatMoney } from '../lib/money'
+import { formatMoney } from '../lib/money'
 import { dateSortKey, formatTxnDate } from '../lib/dates'
 import {
   balanceDue,
   computePlanned,
-  crewCost,
-  gpclKeeps,
   jobColumnTotals,
-  leadFee,
-  marginPct,
-  materialsCost,
-  materialsPending,
-  ownerPay,
   taxStillDue,
 } from '../lib/planned'
 import type { CashDashboard } from '../types'
@@ -238,10 +231,8 @@ export function PlannedIncome({ data }: { data: CashDashboard }) {
         </p>
         <ul className="space-y-3">
           {sortedJobs.map((job) => {
-            const keeps = gpclKeeps(job)
-            const margin = marginPct(job)
-            const mats = materialsCost(job)
-            const fee = leadFee(job)
+            const sv = job.sheet ?? null
+            const show = (v: number | null | undefined) => (v == null ? '—' : formatMoney(v))
             const due = balanceDue(job)
             const taxDue = taxStillDue(job)
             return (
@@ -263,13 +254,14 @@ export function PlannedIncome({ data }: { data: CashDashboard }) {
                     {job.status}
                   </p>
                 </div>
-                <div className="mt-2 grid grid-cols-5 gap-1 text-center">
+                <div className="mt-2 grid grid-cols-6 gap-1 text-center">
                   {[
-                    ['Quoted', formatMoney(job.quotedPreTax), false],
-                    ['− Crew', crewCost(job) == null ? '—' : formatMoney(crewCost(job) as number), false],
-                    ['− Materials', formatMoney(mats), false],
-                    ['− Lead fee', formatMoney(fee), false],
-                    ['= Keeps', keeps == null ? '—' : formatMoney(keeps), true],
+                    ['Quoted', show(sv?.quoted), false],
+                    ['− Crew', show(sv?.crew), false],
+                    ['− Lead fee', show(sv?.leadFee), false],
+                    ['− Materials', show(sv?.materials), false],
+                    ['− Other', show(sv?.otherDirect), false],
+                    ['= Keeps', show(sv?.keeps), true],
                   ].map(([label, value, strong]) => (
                     <div key={label as string} className={strong ? 'rounded-lg bg-gpcl-50 py-0.5' : 'py-0.5'}>
                       <p className="text-[9px] font-bold uppercase tracking-[0.04em] text-gpcl-600">
@@ -280,9 +272,8 @@ export function PlannedIncome({ data }: { data: CashDashboard }) {
                   ))}
                 </div>
                 <p className="mt-1 text-[11px] text-gpcl-800/60">
-                  Quoted is before sales tax.
-                  {margin != null ? ` GPCL keeps ${formatMargin(margin)} of the quote.` : ''}
-                  {ownerPay(job) > 0 ? ` Austin's ${formatMoney(ownerPay(job))} is not in Crew: it stays in profit.` : ''}
+                  {sv ? 'From the Cash Tracker Jobs tab. Quoted is before sales tax.' : 'Cash Tracker has no Keeps for this job yet.'}
+                  {sv?.basis ? ` ${sv.basis}` : ''}
                 </p>
                 <p className="mt-1 text-xs text-gpcl-800/70">
                   {due > 0 ? (
@@ -295,13 +286,8 @@ export function PlannedIncome({ data }: { data: CashDashboard }) {
                   )}
                   {job.deposit > 0 ? ` · deposit ${formatMoney(job.deposit)}` : ''}
                 </p>
-                {materialsPending(job) || job.flags.length > 0 ? (
+                {job.flags.length > 0 ? (
                   <div className="mt-2 flex flex-wrap gap-1.5">
-                    {materialsPending(job) ? (
-                      <span className="rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-semibold text-amber-900 ring-1 ring-amber-200">
-                        ⚠ Materials not in the tracker yet - keeps may be too high
-                      </span>
-                    ) : null}
                     {job.flags.map((f) => (
                       <span
                         key={f}
@@ -320,12 +306,13 @@ export function PlannedIncome({ data }: { data: CashDashboard }) {
           <p className="text-xs font-bold uppercase tracking-[0.08em] text-gpcl-700">
             All {totals.jobCount} jobs together
           </p>
-          <div className="mt-1 grid grid-cols-5 gap-1 text-center">
+          <div className="mt-1 grid grid-cols-6 gap-1 text-center">
             {[
               ['Quoted', colTotals.quoted],
               ['− Crew', colTotals.crew],
-              ['− Materials', colTotals.materials],
               ['− Lead fee', colTotals.leadFees],
+              ['− Materials', colTotals.materials],
+              ['− Other', colTotals.otherDirect],
               ['= Keeps', colTotals.keeps],
             ].map(([label, value]) => (
               <div key={label as string}>

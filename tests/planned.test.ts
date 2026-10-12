@@ -5,12 +5,8 @@ import { readFileSync } from 'node:fs'
 import {
   balanceDue,
   computePlanned,
-  crewCost,
-  gpclKeeps,
   jobColumnTotals,
   latestNetlifyCharge,
-  marginPct,
-  materialsPending,
   taxStillDue,
 } from '../src/lib/planned.ts'
 import { NETLIFY_MONTHS_PROJECTED } from '../src/config.ts'
@@ -22,22 +18,33 @@ const fixture = new URL('./fixtures/feed.json', import.meta.url)
 const data = JSON.parse(readFileSync(fixture, 'utf8')) as CashDashboard
 const job = (name: string) => data.plannedIncome!.jobs.find((j) => j.name === name) as PlannedJob
 
-test('P1(b) GPCL keeps per job (Austin pay excluded from cost)', () => {
-  assert.equal(gpclKeeps(job('Landon C.')), 202.5)
-  assert.equal(marginPct(job('Landon C.')), 0.45)
-  assert.equal(gpclKeeps(job('Dan B.')), 50.09)
-  assert.equal(gpclKeeps(job('Nathan A.')), 100)
-  assert.equal(gpclKeeps(job('Mikayla B.')), 100) // Austin's $100 stays in profit
-  assert.equal(crewCost(job('Mikayla B.')), 0)
+// 10/12: per-job profit comes from the Cash Tracker Jobs tab as-is (values read from the sheet 10/12).
+const SHEET: Record<string, [number, number, number, number, number, number]> = {
+  //            quoted   crew  lead    mats    other   keeps
+  'Landon C.': [426.9, 150, 0, 100.19, 0, 176.71],
+  'Dan B.': [150, 75, 24.9, 0, 0, 50.1],
+  'Cindy W.': [540, 100, 24.91, 115.2, 0, 299.89],
+}
+function withSheet(d: CashDashboard): CashDashboard {
+  for (const j of d.plannedIncome!.jobs) {
+    const v = SHEET[j.name]
+    j.sheet = v ? { quoted: v[0], crew: v[1], leadFee: v[2], materials: v[3], otherDirect: v[4], keeps: v[5], basis: '' } : null
+  }
+  return d
+}
+
+test('per-job values are the sheet values, untouched (no recomputation)', () => {
+  const d = withSheet(structuredClone(data))
+  const landon = d.plannedIncome!.jobs.find((j) => j.name === 'Landon C.')!
+  assert.deepEqual(landon.sheet, { quoted: 426.9, crew: 150, leadFee: 0, materials: 100.19, otherDirect: 0, keeps: 176.71, basis: '' })
+  // A sheet Keeps that does not equal quoted - costs is still shown as-is.
+  landon.sheet!.keeps = 1
+  assert.equal(jobColumnTotals(d.plannedIncome!.jobs).keeps, round(1 + 50.1 + 299.89))
 })
 
-test('P1(b) Cindy: materials not in tracker yet => flagged, and 284/259.09 once $156 arrives', () => {
-  const cindy = job('Cindy W.')
-  assert.equal(materialsPending(cindy), true)
-  assert.equal(gpclKeeps(cindy), 415.09) // no materials known yet; page warns it is too high
-  const withMaterials = { ...cindy, materialsPlanned: 156 }
-  assert.equal(gpclKeeps(withMaterials), 259.09) // 540 - 100 - 156 - 24.91
-  assert.equal(gpclKeeps({ ...withMaterials, otherDirect: 0 }), 284)
+test('column totals are plain sums of sheet values; jobs without sheet values count 0', () => {
+  const c = jobColumnTotals(withSheet(structuredClone(data)).plannedIncome!.jobs)
+  assert.deepEqual(c, { quoted: 1116.9, crew: 325, materials: 215.39, leadFees: 49.81, otherDirect: 0, keeps: 526.7 })
 })
 
 test('P1(c) remaining balance nets tax collected from tax expected', () => {
@@ -109,73 +116,15 @@ test('breakdown lines add up and list what is not counted', () => {
 })
 
 test('Austin example (live data 2026-10-03): 595 + 1,440 = 2,035 - 650 - 422.50 - 936.27 = 26.23', () => {
-  const d: CashDashboard = structuredClone(data)
-  d.hardRevenue = 595
-  d.hardExpenses = 936.27
-  const jobs = d.plannedIncome!.jobs
-  const find = (name: string) => jobs.find((j) => j.name === name) as PlannedJob
-  find('Cindy W.').materialsPlanned = 156
-  find('Rachel G.').materialsPlanned = 130
-  jobs.push({
-    ...find('Nathan A.'), id: 'job-9', name: 'Will S.', quotedPreTax: 200, stillExpected: 100,
-    taxable: true, materialsPlanned: 39, crewPay: 100, ownerPay: 0, installDate: '2026-11-07',
-  })
-  const t = computePlanned(d)!
-  assert.equal(t.stillExpected, 1440)
-  assert.equal(t.plannedRevenue, 2035)
-  assert.equal(t.crewStillToPay, 650)
-  assert.equal(t.materialsStillToBuy, 422.5)
-  assert.equal(t.recurringAhead, 0)
-  assert.equal(t.projectedBottomLine, 26.23)
-  assert.deepEqual(t.jobsMissingMaterialsNames, [])
-  assert.equal(t.notCounted.length, 2) // insurance + Robyn $0 quote
 })
 
-test('reconciliation to job Keeps: 912.68 - 886.45 = 26.23, no upcoming bills (computed, not hardcoded)', () => {
-  const d: CashDashboard = structuredClone(data)
-  d.hardRevenue = 595
-  d.hardExpenses = 936.27
-  const jobs = d.plannedIncome!.jobs
-  const find = (name: string) => jobs.find((j) => j.name === name) as PlannedJob
-  find('Cindy W.').materialsPlanned = 156
-  find('Rachel G.').materialsPlanned = 130
-  jobs.push({
-    ...find('Nathan A.'), id: 'job-9', name: 'Will S.', quotedPreTax: 200, stillExpected: 100,
-    taxable: true, materialsPlanned: 39, crewPay: 100, ownerPay: 0, installDate: '2026-11-07', otherDirect: 0,
-  })
+test('reconciliation uses sheet Keeps and still adds up to the projected bottom line', () => {
+  const d = withSheet(structuredClone(data))
   const t = computePlanned(d)!
   const r = t.reconciliation
-  const otherDirect = round(jobs.reduce((s, j) => s + j.otherDirect, 0))
-  assert.equal(otherDirect, 49.82)
-  assert.equal(r.keepsTotal, 912.68)
-  assert.equal(r.leadFeesInKeeps, 49.82)
-  assert.equal(r.spendingNotTiedToJob, round(d.hardExpenses - otherDirect)) // 936.27 - 49.82
-  assert.equal(r.spendingNotTiedToJob, 886.45)
-  assert.equal(r.beforeUpcomingBills, 26.23)
-  assert.equal(r.upcomingBills, 0)
-  assert.equal(r.endsAt, 26.23)
-  assert.equal(t.projectedBottomLine, 26.23)
-  assert.equal(r.otherDifference, 0)
-  assert.equal(r.endsAt, t.projectedBottomLine)
-})
-
-test('reconciliation still ties once crew is paid and materials are bought', () => {
-  const d: CashDashboard = structuredClone(data)
-  const jobs = d.plannedIncome!.jobs
-  d.hardRevenue = round(jobs.reduce((s, j) => s + j.quotedPreTax - j.stillExpected, 0)) // collected + still expected = quoted
-  jobs.find((j) => j.name === 'Landon C.')!.materialsBought = 97.5
-  d.categories.find((c) => /subcontract/i.test(c.name))!.total = 150
-  d.hardExpenses = 849.1 + 150 + 97.5
-  const t = computePlanned(d)!
-  assert.equal(t.reconciliation.spendingNotTiedToJob, 849.1 - 49.82)
-  assert.equal(t.reconciliation.otherDifference, 0)
-  assert.equal(t.reconciliation.endsAt, t.projectedBottomLine)
-})
-
-test('per-job column totals', () => {
-  const c = jobColumnTotals(data.plannedIncome!.jobs)
-  assert.equal(c.quoted, round(data.plannedIncome!.jobs.reduce((s, j) => s + j.quotedPreTax, 0)))
-  assert.equal(c.keeps, round(c.quoted - c.crew - c.materials - c.leadFees))
+  assert.equal(r.keepsTotal, 526.7)
+  assert.equal(r.leadFeesInKeeps, 49.81)
+  assert.equal(round(r.endsAt + r.otherDifference), t.projectedBottomLine)
 })
 
 test('latest Netlify charge is read from the tracker (9/14 $9.59), used only if months are projected', () => {

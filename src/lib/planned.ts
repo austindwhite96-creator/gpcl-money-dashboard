@@ -87,31 +87,9 @@ export function materialsCost(job: PlannedJob): number {
   return round2(Math.max(job.materialsPlanned || 0, job.materialsBought || 0))
 }
 
-/** Thumbtack lead fee / other direct job cost already logged against this job. */
-export function leadFee(job: PlannedJob): number {
-  return round2(job.otherDirect || 0)
-}
-
 /** True when GPCL sells the lights (taxable install) but no materials are in the tracker yet. */
 export function materialsPending(job: PlannedJob): boolean {
   return job.taxable && job.quotedPreTax > 0 && materialsCost(job) === 0
-}
-
-/**
- * GPCL keeps (profit) = quoted pre-tax − crew pay (EXCLUDING Austin: his pay stays in profit)
- * − materials − lead fee. null when there is no crew pay row for the job.
- */
-export function gpclKeeps(job: PlannedJob): number | null {
-  const cost = crewCost(job)
-  if (cost == null) return null
-  return round2(job.quotedPreTax - cost - materialsCost(job) - leadFee(job))
-}
-
-/** Margin as a fraction of quoted revenue; null when nothing was quoted. */
-export function marginPct(job: PlannedJob): number | null {
-  const keeps = gpclKeeps(job)
-  if (keeps == null || !(job.quotedPreTax > 0)) return null
-  return keeps / job.quotedPreTax
 }
 
 /** Sales tax on this job that has not been collected yet. */
@@ -129,17 +107,26 @@ export interface JobColumnTotals {
   crew: number
   materials: number
   leadFees: number
+  otherDirect: number
   keeps: number
 }
 
-/** Column totals for the per-job table (jobs with no crew pay row count as $0 crew and are left out of keeps). */
+/** The Cash Tracker's own per-job numbers. The dashboard never computes per-job profit. */
+export function sheetValues(job: PlannedJob) {
+  return job.sheet ?? null
+}
+
+/** Column totals = plain sums of the sheet's per-job values (blank counts as 0). */
 export function jobColumnTotals(jobs: PlannedJob[]): JobColumnTotals {
+  const sum = (k: 'quoted' | 'crew' | 'materials' | 'leadFee' | 'otherDirect' | 'keeps') =>
+    round2(jobs.reduce((s, j) => s + (j.sheet?.[k] ?? 0), 0))
   return {
-    quoted: round2(jobs.reduce((s, j) => s + (j.quotedPreTax || 0), 0)),
-    crew: round2(jobs.reduce((s, j) => s + (crewCost(j) ?? 0), 0)),
-    materials: round2(jobs.reduce((s, j) => s + materialsCost(j), 0)),
-    leadFees: round2(jobs.reduce((s, j) => s + leadFee(j), 0)),
-    keeps: round2(jobs.reduce((s, j) => s + (gpclKeeps(j) ?? 0), 0)),
+    quoted: sum('quoted'),
+    crew: sum('crew'),
+    materials: sum('materials'),
+    leadFees: sum('leadFee'),
+    otherDirect: sum('otherDirect'),
+    keeps: sum('keeps'),
   }
 }
 
@@ -205,17 +192,16 @@ export function computePlanned(data: CashDashboard): PlannedTotals | null {
     plannedRevenue - crewStillToPay - materialsStillToBuy - recurringAhead - data.hardExpenses,
   )
 
-  // Reconciliation to per-job Keeps. Keeps already nets each job's planned crew (excl. owner),
-  // materials (max of planned/bought) and lead fee, so the part of "spent to date" that is
-  // inside Keeps is: lead fees + crew already paid (capped at planned) + materials already bought.
-  // Everything else spent is "not tied to a job". With nothing paid to crew and no materials bought
-  // yet this is exactly hardExpenses − sum(otherDirect).
-  const keepsTotal = jobColumnTotals(jobs).keeps
-  const leadFeesInKeeps = round2(jobs.reduce((s, j) => s + leadFee(j), 0))
+  // Reconciliation to the Cash Tracker's per-job Keeps (sheet values, not recomputed here).
+  // Spent to date that is already inside those Keeps: lead fees + other direct + crew already paid
+  // (capped at planned) + materials already bought. Anything left lands in "Other differences".
+  const cols = jobColumnTotals(jobs)
+  const keepsTotal = cols.keeps
+  const leadFeesInKeeps = cols.leadFees
   const crewInKeeps = Math.min(plannedCrewPay, crewPaidSoFar)
   const materialsBoughtTotal = round2(jobs.reduce((s, j) => s + (j.materialsBought || 0), 0))
   const spendingNotTiedToJob = round2(
-    data.hardExpenses - leadFeesInKeeps - crewInKeeps - materialsBoughtTotal,
+    data.hardExpenses - leadFeesInKeeps - cols.otherDirect - crewInKeeps - materialsBoughtTotal,
   )
   const beforeUpcomingBills = round2(keepsTotal - spendingNotTiedToJob)
   const endsAt = round2(beforeUpcomingBills - recurringAhead)
