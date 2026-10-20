@@ -1,3 +1,4 @@
+import { shortJobName } from './lib/names'
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import {
   ArrowDownRight,
@@ -340,7 +341,7 @@ function Dashboard({ data }: { data: CashDashboard }) {
                   <li key={job.id} className="border-t border-gpcl-100 pt-4 first:border-t-0 first:pt-0">
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
-                        <p className="font-semibold text-gpcl-950">{job.name}</p>
+                        <p className="font-semibold text-gpcl-950">{shortJobName(job.name)}</p>
                         <p className="text-sm text-gpcl-800/70">
                           {job.jobDate ? formatTxnDate(job.jobDate) : 'Date TBD'}
                         </p>
