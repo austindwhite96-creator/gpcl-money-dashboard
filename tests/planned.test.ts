@@ -8,6 +8,7 @@ import {
   jobColumnTotals,
   latestNetlifyCharge,
   taxStillDue,
+  breakdownToHeadline,
 } from '../src/lib/planned.ts'
 import { NETLIFY_MONTHS_PROJECTED } from '../src/config.ts'
 import { formatMoney } from '../src/lib/money.ts'
@@ -138,3 +139,20 @@ test('latest Netlify charge is read from the tracker (9/14 $9.59), used only if 
 function round(n: number) {
   return Math.round(n * 100) / 100
 }
+
+test('breakdown reconciles exactly to the Cash Tracker Season-End Profit headline', () => {
+  // Live case 2026-10-22: B8 = 1305.33, old app math 925.38 (379.95 inventory double counted).
+  const b = breakdownToHeadline({ projectedBottomLine: 925.38 }, 1305.33)
+  assert.equal(b.alreadyPaidInventory, 379.95)
+  assert.equal(b.bottomLine, 1305.33)
+  assert.equal(Math.round((925.38 + (b.alreadyPaidInventory ?? 0)) * 100) / 100, 1305.33)
+  const t = computePlanned(data)!
+  const f = breakdownToHeadline(t, data.seasonEndProfit)
+  assert.equal(f.bottomLine, data.seasonEndProfit)
+  assert.equal(Math.round((t.projectedBottomLine + (f.alreadyPaidInventory ?? 0)) * 100) / 100, data.seasonEndProfit)
+})
+
+test('breakdown: no extra line when headline missing or already equal', () => {
+  assert.deepEqual(breakdownToHeadline({ projectedBottomLine: 10 }, null), { alreadyPaidInventory: null, bottomLine: 10 })
+  assert.deepEqual(breakdownToHeadline({ projectedBottomLine: 10 }, 10), { alreadyPaidInventory: null, bottomLine: 10 })
+})

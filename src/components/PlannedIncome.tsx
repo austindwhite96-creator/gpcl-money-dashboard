@@ -7,6 +7,7 @@ import {
   computePlanned,
   jobColumnTotals,
   taxStillDue,
+  breakdownToHeadline,
 } from '../lib/planned'
 import type { CashDashboard } from '../types'
 
@@ -83,6 +84,7 @@ export function PlannedIncome({ data }: { data: CashDashboard }) {
       ? data.seasonEndProfit
       : totals.projectedBottomLine
   const negative = bottomLine < 0
+  const breakdown = breakdownToHeadline(totals, data.seasonEndProfit)
   const rec = totals.reconciliation
   const colTotals = jobColumnTotals(planned.jobs)
   const billsLabel = totals.recurringItems.length
@@ -165,10 +167,23 @@ export function PlannedIncome({ data }: { data: CashDashboard }) {
           </>
         ) : null}
         <Row label="− Spent to date" value={`−${formatMoney(totals.expensesToDate)}`} />
+        {breakdown.alreadyPaidInventory != null ? (
+          <>
+            <Row
+              label="+ Already-paid inventory (from Cash Tracker)"
+              value={`${breakdown.alreadyPaidInventory < 0 ? '−' : '+'}${formatMoney(Math.abs(breakdown.alreadyPaidInventory))}`}
+            />
+            <Note>
+              Materials for these jobs that came out of inventory already bought, so they are already
+              inside Spent to date. Added back so they are not counted twice; this makes the total match
+              the Cash Tracker Season-End Profit.
+            </Note>
+          </>
+        ) : null}
         <div className="mt-1 border-t border-amber-200 pt-1">
           <Row
             label="= Projected bottom line"
-            value={formatMoney(totals.projectedBottomLine)}
+            value={formatMoney(breakdown.bottomLine)}
             bold
             negative={negative}
           />

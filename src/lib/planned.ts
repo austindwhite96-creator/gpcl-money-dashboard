@@ -257,3 +257,21 @@ export function computePlanned(data: CashDashboard): PlannedTotals | null {
     missingCrewPay: jobs.filter((j) => j.crewPay == null).length,
   }
 }
+
+/**
+ * Line-by-line breakdown that reconciles exactly to the headline (Cash Tracker Dashboard B8
+ * 'Season-End Profit'). The feed does not expose Jobs column Z ('inventory already expensed',
+ * already inside Hard Expenses), so the app's per-job materials math double counts it. Instead of
+ * re-deriving it, the gap to the tracker's own number is shown as one labeled line.
+ * alreadyPaidInventory is null when there is no seasonEndProfit or no gap.
+ */
+export function breakdownToHeadline(
+  totals: Pick<PlannedTotals, 'projectedBottomLine'>,
+  seasonEndProfit: number | null | undefined,
+): { alreadyPaidInventory: number | null; bottomLine: number } {
+  if (typeof seasonEndProfit !== 'number' || !Number.isFinite(seasonEndProfit)) {
+    return { alreadyPaidInventory: null, bottomLine: totals.projectedBottomLine }
+  }
+  const diff = round2(seasonEndProfit - totals.projectedBottomLine)
+  return { alreadyPaidInventory: Math.abs(diff) < 0.005 ? null : diff, bottomLine: seasonEndProfit }
+}
