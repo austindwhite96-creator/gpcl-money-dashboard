@@ -77,7 +77,12 @@ export function PlannedIncome({ data }: { data: CashDashboard }) {
   const sortedJobs = [...planned.jobs].sort((a, b) =>
     dateSortKey(a.installDate).localeCompare(dateSortKey(b.installDate)),
   )
-  const negative = totals.projectedBottomLine < 0
+  // Headline = Cash Tracker Dashboard B8 'Season-End Profit' straight from the feed (no per-job math).
+  const bottomLine =
+    typeof data.seasonEndProfit === 'number' && Number.isFinite(data.seasonEndProfit)
+      ? data.seasonEndProfit
+      : totals.projectedBottomLine
+  const negative = bottomLine < 0
   const rec = totals.reconciliation
   const colTotals = jobColumnTotals(planned.jobs)
   const billsLabel = totals.recurringItems.length
@@ -108,11 +113,11 @@ export function PlannedIncome({ data }: { data: CashDashboard }) {
           </span>
         </p>
         <p className="mt-1 text-4xl font-bold tracking-tight">
-          {formatMoney(totals.projectedBottomLine)}
+          {formatMoney(bottomLine)}
         </p>
         <p className="mt-1 text-sm text-white/80">
-          After all {totals.jobCount} booked jobs are collected and paid for: crew, materials and
-          monthly bills included. Net today (collected − spent) is{' '}
+          After all {totals.jobCount} booked jobs are collected and paid for: crew and
+          materials included. Net today (collected − spent) is{' '}
           {formatMoney(totals.netToday)}.
         </p>
       </div>
